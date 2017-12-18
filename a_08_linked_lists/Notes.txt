@@ -1,0 +1,3 @@
+List have O(n) space complexity, but can be reduced to O(1)
+Add dummy head in the beigninig to check null
+Possibly use two iterators for advance computing

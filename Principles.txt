@@ -1,0 +1,21 @@
+Analysis patterns
+
+Concrete examples
+Case analysis
+Iterative refinement
+Reduction
+Graph modeling
+
+
+Algorithm design pattern
+
+Sorting
+Recursion
+Divide and Conquer
+Dynamic Programming
+Greedy algorithm
+Invariants
+
+
+
+

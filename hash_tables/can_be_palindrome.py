@@ -10,3 +10,5 @@ for k, v in char_freq.items():
     if palindrome_possible:
         break
 print(f"Palindrome is {palindrome_possible}")
+
+# TODO complexity is O(2n) reduce it to O(n) + log(n)
