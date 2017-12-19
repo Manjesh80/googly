@@ -28,6 +28,12 @@ def generate_list(start, end, func, cycle_at=-1):
     return root_node
 
 
+def print_list(root_node):
+    while root_node is not None:
+        print(f"Current element is ==> {root_node.data}")
+        root_node = root_node.next_node
+
+
 def has_cycle(ml):
     slow_ml = ml
     print(f"Slow Node Start ==> {slow_ml.data}")
@@ -61,12 +67,6 @@ def has_cycle(ml):
         # print(f"Finder Node ==> {finder_ml.data}")
         # print(" ************** ")
     print(f"Cycle starts at ==> {finder_ml.data}")
-
-
-def print_list(root_node):
-    while root_node is not None:
-        print(f"Current element is ==> {root_node.data}")
-        root_node = root_node.next_node
 
 
 if __name__ == '__main__':
