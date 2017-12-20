@@ -1,4 +1,4 @@
-from .a_00_list_util import *
+from ..common import *
 
 l1 = generate_list(1, 5, lambda x: x ** 2)
 l2 = generate_list(2, 5, lambda x: x ** 3)
