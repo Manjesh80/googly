@@ -1,22 +1,6 @@
 #  If a number has odd number of 1's the parity in 1 else zero
 
-MASK_04_BIT = 0x3
-MASK_04_BIT = 0x7
-MASK_08_BIT = 0xFF
-MASK_16_BIT = 0xFFFF
-MASK_32_BIT = 0xFFFFFFFF
-MASK_64_BIT = 0xFFFFFFFFFFFFFFFF
-
-
-def is_64_bit(x):
-    '''
-    :param x:
-    :return:
-    If you mask with 64 bit it should give the same value the its 64 bit , test case
-    pass 2**40 i.e.  1099511627776
-    is_64_bit(1099511627776) // returns true
-    '''
-    return True if x == (x & MASK_64_BIT) else False
+from .a_00_common import *
 
 
 def calculate_parity_by_number_of_ones(x):
@@ -32,17 +16,7 @@ def build_parity_dict(mask=0xFFFF):
     return {x: calculate_parity_by_number_of_ones(x) for x in range(0, int(mask))}
 
 
-def build_dict_mask_by_power():
-    """
-    2**2 = 11 i.e.4  ( 4-1 )
-    2**3 = 111 i.e.7 ( 8-1)
-    2**4 = 1111 i.e.15
-    :return:
-    """
-    return {x: (2 ** x) - 1 for x in range(0, 64)}
-
-
-def calculate_parity_fixed(x, parity_dict, mask_size_bit=16, mask=0xFFFF):
+def calculate_parity_fixed(x, parity_dict, mask_size_bit=16, mask=MASK_16_BIT):
     """
     Mask with 16 bits at a time, and do a lookup.
     This is great for massive lookup like discussion with lalit on storing 2**64 combinations
