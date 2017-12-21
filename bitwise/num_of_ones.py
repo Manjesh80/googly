@@ -1,5 +1,5 @@
 # page 23
-x = 3
+x = 8
 no_of_bits_set_to_1 = {}
 while x != 0:
     y = x & (~(x - 1))
