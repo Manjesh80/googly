@@ -17,6 +17,10 @@ def test_calculate_parity_just_mug():
     assert calculate_parity_just_mug(6) == 0
 
 
+def test_right_propogate_right_most_to_one_in_O1():
+    assert right_propogate_right_most_to_one_in_O1(80) == 95
+
+
 def test_build_parity_dict():
     parity_dict = build_parity_dict(MASK_16_BIT)
 
