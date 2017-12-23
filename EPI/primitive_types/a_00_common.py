@@ -1,4 +1,5 @@
 import math
+import random
 
 MASK_04_BIT = 0x3
 MASK_04_BIT = 0x7
@@ -98,6 +99,20 @@ def is_number_a_palindrome(x):
         x //= 10
         mask_digit //= 100
     return result;
+
+
+# 4.10 generate a uniform random number
+def generate_uniform_random_number(lb, ub):
+    # Example scenario 1, 6 in dice
+    num_of_outcomes = ub - lb + 1
+    while True:
+        result, i = 0, 0
+        while (1 << i) < num_of_outcomes:  # if number of outcomes is 6 then it moved 3 times  1,2,4,8
+            result = result << 1 | random.choices([0, 1])[0]
+            i += 1
+        if result < num_of_outcomes:  # here if all comes as 111 the value will be 7 , but our range is 1 to 6 so retry
+            break
+    return result + lb
 
 
 def build_dict_mask_by_power():
