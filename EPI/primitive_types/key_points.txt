@@ -1,0 +1,192 @@
+x & ( x - 1 ) ==> Clears the lowest set bit for example 10 ( 1010 ) will give you 8 ( 1000)
+x & ( ~ ( x - 1 ) ) ==> Gives the value 2**k where k is the lowest set bit .. example 20 (10100) --> the value of the lowest set bit is 4 ==>   20 & ( ~ ( 20 - 1 ) ) ==> yields 4
+~x & ( x + 1 ) ) ==> Lowest bit noset ==> ~x & ( x + 1 ) ) ==> ~6 & 7  ==> 1
+
+
+4.1 Calculate parity
+use XOR as a counter for flip flop, i.e if you meet condition 1 time you time 1, two time you get zero, 3 times means 1, 4 times meanz zero : code at Page 25
+result = 0
+while condition:
+  result ^= 1
+
+Remember to use lookup values when you can store the values in 2**16, so that to find number of bit , if you use while loop to
+find the lowest set bit , and iterate worst case is O(64), but if you do a lookup it will be constant 4 lookup
+def calculate_parity_fixed(x, parity_dict, mask_size_bit=16, mask=MASK_16_BIT):
+
+Advance parity calculation - Head spins
+
+parity of 1101 0111 is zero ( i.e even bits ) is same
+1101 ^ 0111 ==> 1010 ==> 10 ^ 10 ==> 00 ==> i.e 0
+
+x ^= x >> 32
+x ^= x >> 16
+x ^= x >> 8
+x ^= x >> 4
+x ^= x >> 2
+x ^= x >> 1
+
+4.2 Swap bits
+How to check if a bit at an index i is set to 1 or zero
+
+x >> i ==> right shift by i and perform and AND operation if 1 then set else zero
+1 if x >> i & 1 else 0
+
+To swap bits at location i and j create a mask with appropriate values
+mask = 1 << i | 1 << j
+x ^=  mask
+
+4.3
+Reverse bits , you can swap from 63,0 , 62,1 and so on but its n/2 , easier is to compute lookup for 2**16
+and move the chunks. Page 28
+
+4.4
+Find closest integer with same weight, technique is to swap first two differnt LSB i.e  6(110) return 5 (101)
+
+for 7(111) return ( 1011) 11
+S ==> Lowest setbit ==> x & ( ~ ( x -1 ) ) ==>  7 & ( ~ 6) ==> 1
+NS ==> Lowest bit noset ==> ~x & ( x + 1 ) ) ==> ~7 & 8  ==> 8
+IF S < NS
+  THEN SWAP NS WITH NEXT INDEX
+
+for 6(110) return 5 (101)
+S ==> Lowest setbit ==> x & ( ~ ( x -1 ) ) ==>  6 & ( ~ 5) ==> 2
+NS ==> Lowest bit noset ==> ~x & ( x + 1 ) ) ==> ~6 & 7  ==> 1
+IF S > NS:
+  THEN SWAP S WITH NEXT INDEX
+
+4.5 Compute x X y . multiplication
+
+In x if bit is set , Keep moving x >> 1 and y << 1, and add two numbers
+
+7(111) X 3 ( 11 ) ==> 21 (10101 )
+
+Iteration 1
+(x >> 0) > 0
+Result = 0
+Bit 1 is set ==> Result + 3
+new y = 110 ( 6 )
+
+(x >> 1) > 0
+bit 2 is set ==> result + y ==> 3 + 6 ==> 9
+new y = 1100 ( 12 )
+
+(x >> 2) > 0
+bit 3 is set ==> result + y ==> 9 + 12 ==> 21
+new y = 11000
+
+(x >> 3) > 0 ( False , break )
+
+4.6 Compute quotient for x / y
+
+TODO REVISIT
+
+4.7 Compute X ** Y , you can use multiplication
+
+10(1010) ** 5(101) => 100000
+
+result = 1
+x = 10
+Iteration 1
+bit 1 of y is one ==> result = result * x ==> 10
+x = x * x = 100
+
+Iteration 2
+bit 2 of y is zero ==> result = 10
+x = x * x = 10000
+
+Iteration 3
+bit 3 of y is one ==> result = result * x ==> 100000
+x = x * x = 100000000
+
+Iteration 4
+bit 4 of y is ZERO and Y is zero as well, so break
+
+result = 1
+x = 10
+y = 5
+x, y = 1/x, -y if y < 0 else x, y
+while y:
+  if y & 1:
+    result = result * x
+  x , y = x * x , y >> 1
+
+
+4.8 Reverse digits
+
+x = 1234
+result = 0
+
+Iter 1
+tail = x % 10 ==> 4
+result = result * 10 + tail ==> 4
+x =  x // 10 ==> 123
+
+Iter 2
+tail = x % 10 ==> 123 % 10 ==> 3
+result = result * 10 + tail ==> 4 * 10 + 3
+x = x // 10 = 12
+
+
+4.9 Check if number is palindrome
+
+Get number of digits math.log10(x) + 1
+
+x = 3223
+nd = math.floor(math.log10(x)) + 1 ==> 4
+mask = 10 ** nd-1 ==> 1000
+
+for i in range( nd // 2 ):
+    reminder = x % 10
+    quo = x // mask
+    if reminder != quo
+     break
+    x = x % mask # remove significant
+    x = x // 10 #remove least digit
+    mask // = 100
+
+
+4.10 Generate uniform random number
+
+lb = 1 , ub = 6
+no_op_opts = ub -lb + 1 = 6-1+1 ==> 6 DICE
+
+while True
+    i , res = 0, 0
+    while 1 << i < no_op_opts:
+        i + 1
+        res = (res <<= 1) ^ random_zero_one()
+    if res < no_op_opts
+      break
+return  lb + rnd
+
+
+4.11. Rectangle problem. TODO Revisit with white board
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

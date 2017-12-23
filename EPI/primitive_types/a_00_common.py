@@ -1,5 +1,6 @@
 import math
 import random
+from collections import namedtuple
 
 MASK_04_BIT = 0x3
 MASK_04_BIT = 0x7
@@ -113,6 +114,14 @@ def generate_uniform_random_number(lb, ub):
         if result < num_of_outcomes:  # here if all comes as 111 the value will be 7 , but our range is 1 to 6 so retry
             break
     return result + lb
+
+
+Rectangle = namedtuple("Rectangle", ("x", "y", "w", "h"))
+
+
+# 4.11 Intersection of rectangles white board : Page 35
+def do_rectangle_intersect():
+    pass
 
 
 def build_dict_mask_by_power():
