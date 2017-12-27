@@ -1,4 +1,4 @@
-Mapping = ['0', '1', 'ABC', 'DEF', 'GHI']
+Mapping = ['0', '1', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ']
 
 
 def mnemonic(digit):
@@ -16,6 +16,19 @@ def cross_the_list(a, b):
         for item_b in b:
             res.append(item_a + item_b)
     return res
+
+
+def phone_memonic(phone_number):
+    def phone_memonic_helper(digit):
+        if digit == len(phone_number):
+            mnemonics.append(''.join(partial_mnemonic))
+        else:
+            for c in Mapping[int(phone_number[digit])]:
+                partial_mnemonic[digit] = c
+                phone_memonic_helper(digit + 1)
+
+    mnemonics, partial_mnemonic = [], [0] * len(phone_number)
+    phone_memonic_helper(0)
 
 
 if __name__ == "__main__":
