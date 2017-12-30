@@ -1,6 +1,7 @@
 class BTNode():
-    def __init__(self, data, left=None, right=None):
+    def __init__(self, *, data, name, left=None, right=None):
         self.data = data
+        self.name = data
         self.left = left
         self.right = right
         self.depth = -1
@@ -20,8 +21,24 @@ def print_in_order(bt_node):
     print_in_order(bt_node.right)
 
 
+def build_symmetric_tree():
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=c.split(',')[1]) for c in
+             "a,314#b,6#c,2#d,3#e,6#f,2#g,3".split('#')}
+
+    nodes['a'].left = nodes['b']
+    nodes['a'].right = nodes['e']
+
+    nodes['b'].right = nodes['c']
+    nodes['c'].right = nodes['d']
+
+    nodes['e'].left = nodes['f']
+    nodes['f'].left = nodes['g']
+
+    return nodes['a']
+
+
 def build_tree():
-    nodes = {c: BTNode(c) for c in "abcdefghijklmnop"}
+    nodes = {c: BTNode(name=c, data=c) for c in "abcdefghijklmnopq"}
 
     # depth 0
     nodes['a'].left = nodes['b']
@@ -48,8 +65,7 @@ def build_tree():
     # depth 4
     nodes['l'].right = nodes['m']
 
-    # depth 5
-    # nodes['m'].right = nodes['q']
+    # nodes['g'].right = nodes['q']
     return nodes['a']
 
 
@@ -119,13 +135,36 @@ def compute_tree_depth_from_top(root, parent_depth):
         compute_tree_depth_from_top(root.right, parent_depth + 1)
 
 
+def depth_of_complete_sub_tree(parent_node):
+    def tree_depth_from_top(root, parent_depth):
+        if root:
+            current_depth = parent_depth + 1
+            max_depth[0] = current_depth
+            root.depth = current_depth
+            if root.left and root.right:
+                tree_depth_from_top(root.left, current_depth)
+                tree_depth_from_top(root.right, current_depth)
+
+    max_depth = [0]
+    tree_depth_from_top(parent_node, -1)
+    return max_depth[0] + 1
+
+
+# 9.2 Check if a tree is Symmetric
+def is_tree_symmetric(root):
+    def check_symmetry(left_tree, right_tree):
+        if not left_tree and not right_tree:
+            return True
+        elif (not left_tree) ^ (not right_tree):
+            return False
+        elif left_tree and right_tree:
+            return ((left_tree.data == right_tree.data)
+                    and check_symmetry(left_tree.right, right_tree.left)
+                    and check_symmetry(left_tree.left, right_tree.right))
+
+    return check_symmetry(root.left, root.right)
+
+
 if __name__ == "__main__":
-    # calculate_tree_depth(nodes['a'])
-    # height_of_left_tree = calculate_tree_depth(nodes['b'])
-    # height_of_right_tree = calculate_tree_depth(nodes['i'])
-    # print(f" Height of left left tree {height_of_left_tree+1}")
-    # print(f" Height of left right tree {height_of_right_tree+1}")
-    # print_pre_order(nodes['a'])
-    root = build_tree()
-    compute_tree_depth_from_top(root, -1)
-    print_pre_order(root)
+    root = build_symmetric_tree()
+    print(f"Is Symmetric tree ? {is_tree_symmetric(root)}")
