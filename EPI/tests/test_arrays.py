@@ -42,4 +42,26 @@ def test_permute_array_with_o1_space():
 def test_compute_next_permutation():
     res = compute_next_permutation([6, 2, 3, 5, 4, 1, 0])
     assert res == [6, 2, 4, 0, 1, 3, 5]
-    pass
+
+
+# 5.12 - Sample offline data
+# test command ==> pytest EPI\tests\test_arrays.py::test_generate_random_offline_data
+def test_generate_random_offline_data():
+    res = generate_random_offline_data([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3)
+    assert len(res) == 3
+
+
+# 5.13 - Sample online data
+# test command ==> pytest -s EPI\tests\test_arrays.py::test_generate_random_sample_online
+def test_generate_random_sample_online():
+    sample = generate_random_sample_online(ordered_seq_generator(), 10)
+    print(sample)
+    assert len([x for x in sample if x > 50]) > 2
+
+
+# 5.14 - Compute a Random permutation
+# test command ==> pytest -s EPI\tests\test_arrays.py::test_generate_random_permutation
+def test_generate_random_permutation():
+    sample = generate_random_permutation([10, 20, 30, 40, 50, 60])
+    print(sample)
+    assert len(sample) == 6

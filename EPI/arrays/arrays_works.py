@@ -1,3 +1,9 @@
+from random import randint
+from collections import Counter
+from itertools import islice
+from random import randrange
+
+
 def separate_even_odd(arr):
     even_spot = 0
     odd_spot = len(arr) - 1
@@ -84,11 +90,41 @@ def compute_next_permutation(A):
     return A
 
 
-# 5.12 - Sample offline data ==> TODO
+# 5.12 - Sample offline data
+def generate_random_offline_data(A, k):
+    for i in range(0, k):
+        r = randint(0, len(A) - 1)
+        A[i], A[r] = A[r], A[i]
+    return A[0:k]
 
-# 5.13 - Sample online data ==> TODO
 
-# 5.14 - Compute a Random permutation ==> TODO
+# 5.13 - Sample online data
+def ordered_seq_generator(n=100):
+    i = 1
+    while i < n:
+        yield i
+        i += 1
+
+
+def generate_random_sample_online(it, k):
+    sampling_result = list(islice(it, k))
+    numbers_seen_so_far = k
+
+    for x in it:
+        numbers_seen_so_far += 1
+        idx_replace = randrange(numbers_seen_so_far)
+        if idx_replace < k:
+            sampling_result[idx_replace] = x
+    return sampling_result
+
+
+# 5.14 - Compute a Random permutation
+def generate_random_permutation(A):
+    for i in range(0, len(A)):
+        r = randint(0, len(A) - 1)
+        A[r], A[i] = A[i], A[r]
+    return A
+
 
 # 5.15 - Compute a Random subset ==> TODO
 
@@ -111,7 +147,17 @@ if __name__ == "__main__":
     # res = multiply_two_arrays([1, 2, 1], [1, 2, 2])
     # print(res)
     # res = permute_array_with_o1_space(['a', 'b', 'c', 'd'], [2, 0, 1, 3])
+    # res = compute_next_permutation([6, 2, 3, 5, 4, 1, 0])
+    # res = []
+    # for i in range(100):
+    #     res = res + generate_random_offline_data([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3)
+    # for i in range(1, 11):
+    #     print(f" {i} was selected ==> {res.count(i)} times")
+    # sample = generate_random_sample_online(ordered_seq_generator(), 10)
+    # for i in range(1000):
+    #     sample = generate_random_permutation([10, 20, 30, 40, 50, 60])
+    #     if sample[0] == 10:
+    #         print(f"Attmept {i} ==> {sample}")
+    #         break
 
-    res = compute_next_permutation([6, 2, 3, 5, 4, 1, 0])
-    print(res)
     pass
