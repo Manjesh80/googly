@@ -10,9 +10,9 @@ class BTNode():
         self.depth = -1
         self.parent = parent
 
-    # def __str__(self):
-    #     return str.format(" Name ==> " + self.name +
-    #                       " Data ==> " + self.data)
+        # def __str__(self):
+        #     return str.format(" Name ==> " + self.name +
+        #                       " Data ==> " + self.data)
 
 
 def print_in_order(bt_node):
@@ -260,15 +260,17 @@ def sum_the_root_to_leaf_path(root):
             right_dict_values = get_child_nodes(node.right)
 
             if left_dict_values or right_dict_values:
-                # Iterate and add value
                 merged_dict = {**left_dict_values, **right_dict_values}
                 for key in merged_dict.keys():
-                    merged_dict[key] = merged_dict[key].extend(node.data)
+                    if merged_dict[key]:
+                        merged_dict[key] = merged_dict[key].extend(node.data)
+                    else:
+                        merged_dict[key] = [node.data]
                 return merged_dict
             else:
                 return {node.name: [node.data]}
         else:
-            return {}
+            return None
 
     res = get_child_nodes(root)
     return res
@@ -276,5 +278,5 @@ def sum_the_root_to_leaf_path(root):
 
 if __name__ == "__main__":
     tree = build_tree_dict()
-    parent = sum_the_root_to_leaf_path(tree['b'])
+    parent = sum_the_root_to_leaf_path(tree['a'])
     print(parent)
