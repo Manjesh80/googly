@@ -15,3 +15,11 @@ def test_calculate_tree_depth():
 def test_is_tree_symmetric():
     root = build_symmetric_tree()
     assert True == is_tree_symmetric(root)
+
+
+# 9.4 Compute the LCA with Parent( lowest common ancestor ) in Binary Tree
+# pytest EPI\tests\test_binary_tree.py::test_lca_with_parent
+def test_lca_with_parent():
+    tree = build_tree_dict_with_parent()
+    parent = lca_with_parent(tree['m'], tree['p'])
+    assert parent.data == 'i'

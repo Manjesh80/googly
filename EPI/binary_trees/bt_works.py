@@ -4,7 +4,7 @@ from collections import namedtuple
 class BTNode():
     def __init__(self, *, data, name, left=None, right=None, parent=None):
         self.data = data
-        self.name = data
+        self.name = name
         self.left = left
         self.right = right
         self.depth = -1
@@ -46,7 +46,8 @@ def build_symmetric_tree():
 
 
 def build_tree_dict():
-    nodes = {c: BTNode(name=c, data=c) for c in "abcdefghijklmnop"}
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=c.split(',')[1]) for c in
+             "a,1#b,0#c,0#d,0#e,1#f,1#g,1#h,0#i,1#j,0#k,0#l,0#m,1#n,0#o,0#p,0".split('#')}
 
     # depth 0
     nodes['a'].left = nodes['b']
@@ -220,6 +221,7 @@ def lca(tree, node0, node1):
     return lca_helper(tree, node0, node1).ancestor
 
 
+# 9.4 Compute the LCA with Parent( lowest common ancestor ) in Binary Tree
 def lca_with_parent(node0, node1):
     def get_node_depth(node):
         depth = -1
@@ -250,7 +252,29 @@ def lca_with_parent(node0, node1):
     return node0
 
 
+# 9.5 Sum the root to leaf paths
+def sum_the_root_to_leaf_path(root):
+    def get_child_nodes(node):
+        if node:
+            left_dict_values = get_child_nodes(node.left)
+            right_dict_values = get_child_nodes(node.right)
+
+            if left_dict_values or right_dict_values:
+                # Iterate and add value
+                merged_dict = {**left_dict_values, **right_dict_values}
+                for key in merged_dict.keys():
+                    merged_dict[key] = merged_dict[key].extend(node.data)
+                return merged_dict
+            else:
+                return {node.name: [node.data]}
+        else:
+            return {}
+
+    res = get_child_nodes(root)
+    return res
+
+
 if __name__ == "__main__":
-    tree = build_tree_dict_with_parent()
-    parent = lca_with_parent(tree['a'], tree['i'])
-    print(parent.data)
+    tree = build_tree_dict()
+    parent = sum_the_root_to_leaf_path(tree['b'])
+    print(parent)
