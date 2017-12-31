@@ -1,10 +1,18 @@
+from collections import namedtuple
+
+
 class BTNode():
-    def __init__(self, *, data, name, left=None, right=None):
+    def __init__(self, *, data, name, left=None, right=None, parent=None):
         self.data = data
         self.name = data
         self.left = left
         self.right = right
         self.depth = -1
+        self.parent = parent
+
+    # def __str__(self):
+    #     return str.format(" Name ==> " + self.name +
+    #                       " Data ==> " + self.data)
 
 
 def print_in_order(bt_node):
@@ -37,8 +45,8 @@ def build_symmetric_tree():
     return nodes['a']
 
 
-def build_tree():
-    nodes = {c: BTNode(name=c, data=c) for c in "abcdefghijklmnopq"}
+def build_tree_dict():
+    nodes = {c: BTNode(name=c, data=c) for c in "abcdefghijklmnop"}
 
     # depth 0
     nodes['a'].left = nodes['b']
@@ -66,7 +74,31 @@ def build_tree():
     nodes['l'].right = nodes['m']
 
     # nodes['g'].right = nodes['q']
-    return nodes['a']
+    return nodes
+
+
+def build_tree_dict_with_parent():
+    nodes = build_tree_dict();
+    nodes['b'].parent = nodes['a']
+    nodes['c'].parent = nodes['b']
+    nodes['d'].parent = nodes['c']
+    nodes['e'].parent = nodes['c']
+    nodes['f'].parent = nodes['b']
+    nodes['g'].parent = nodes['f']
+    nodes['h'].parent = nodes['g']
+    nodes['i'].parent = nodes['a']
+    nodes['j'].parent = nodes['i']
+    nodes['k'].parent = nodes['j']
+    nodes['n'].parent = nodes['k']
+    nodes['l'].parent = nodes['k']
+    nodes['m'].parent = nodes['l']
+    nodes['o'].parent = nodes['i']
+    nodes['p'].parent = nodes['o']
+    return nodes
+
+
+def build_tree():
+    build_tree_dict()['a']
 
 
 def print_in_order_traversal(root):
@@ -165,6 +197,60 @@ def is_tree_symmetric(root):
     return check_symmetry(root.left, root.right)
 
 
+# 9.3 Compute the LCA ( lowest common ancestor ) in Binary Tree
+def lca(tree, node0, node1):
+    Status = namedtuple("Status", ('num_target_nodes', 'ancestor'))
+
+    def lca_helper(tree, node0, node1):
+        if not tree:
+            return Status(0, None)
+
+        left_result = lca_helper(tree.left, node0, node1)
+        if left_result.num_target_nodes == 2:
+            return left_result
+
+        right_result = lca_helper(tree.right, node0, node1)
+        if right_result.num_target_nodes == 2:
+            return right_result
+
+        num_target_nodes = (left_result.num_target_nodes + right_result.num_target_nodes +
+                            int(tree in (node0, node1)))
+        return Status(num_target_nodes, tree if num_target_nodes == 2 else None)
+
+    return lca_helper(tree, node0, node1).ancestor
+
+
+def lca_with_parent(node0, node1):
+    def get_node_depth(node):
+        depth = -1
+        while node:
+            node = node.parent
+            depth += 1
+        return depth
+
+    def ascend_node(node, height):
+        while height > 0:
+            height -= 1
+            node = node.parent
+        return node
+
+    node0_depth, node1_depth = get_node_depth(node0), get_node_depth(node1)
+    depth_difference = abs(node0_depth - node1_depth)
+
+    if node0_depth > node1_depth:
+        node0 = ascend_node(node0, depth_difference)
+        node0_depth -= depth_difference
+    elif node1_depth > node0_depth:
+        node1 = ascend_node(node1, depth_difference)
+        node1_depth -= depth_difference
+
+    while node0 is not node1:
+        node0, node1 = node0.parent, node1.parent
+
+    return node0
+
+
 if __name__ == "__main__":
-    root = build_symmetric_tree()
-    print(f"Is Symmetric tree ? {is_tree_symmetric(root)}")
+    tree = build_tree_dict_with_parent()
+    parent = lca_with_parent(tree['a'], tree['i'])
+    print(parent.data)
