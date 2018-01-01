@@ -259,13 +259,20 @@ def sum_the_root_to_leaf_path(root):
             left_dict_values = get_child_nodes(node.left)
             right_dict_values = get_child_nodes(node.right)
 
-            if left_dict_values or right_dict_values:
-                merged_dict = {**left_dict_values, **right_dict_values}
+            if left_dict_values is not None or right_dict_values is not None:
+                merged_dict = {}
+                if left_dict_values is not None:
+                    merged_dict = dict(left_dict_values)
+                if right_dict_values is not None:
+                    merged_dict = {**merged_dict, **right_dict_values}
+
+                # merged_dict = {**left_dict_values, **right_dict_values}
                 for key in merged_dict.keys():
                     if merged_dict[key]:
-                        merged_dict[key] = merged_dict[key].extend(node.data)
+                        merged_dict[key].extend(node.data)
                     else:
                         merged_dict[key] = [node.data]
+
                 return merged_dict
             else:
                 return {node.name: [node.data]}
