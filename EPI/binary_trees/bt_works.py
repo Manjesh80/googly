@@ -2,17 +2,38 @@ from collections import namedtuple
 
 
 class BTNode():
-    def __init__(self, *, data, name, left=None, right=None, parent=None):
+    def __init__(self, *, data, name, left=None, right=None, parent=None, exploded=False):
         self.data = data
         self.name = name
         self.left = left
         self.right = right
         self.depth = -1
         self.parent = parent
+        self.exploded = False
+
+    def is_leaf(self):
+        return not self.left and not self.right
 
         # def __str__(self):
         #     return str.format(" Name ==> " + self.name +
         #                       " Data ==> " + self.data)
+
+
+class Stack():
+    def __init__(self):
+        self.data = []
+
+    def push(self, value):
+        self.data.append(value)
+
+    def pop(self):
+        return self.data.pop()
+
+    def peek(self):
+        return self.data[-1]
+
+    def has_item(self):
+        return len(self.data) > 0
 
 
 def print_in_order(bt_node):
@@ -46,8 +67,11 @@ def build_symmetric_tree():
 
 
 def build_tree_dict():
-    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=c.split(',')[1]) for c in
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=int(c.split(',')[1])) for c in
              "a,1#b,0#c,0#d,0#e,1#f,1#g,1#h,0#i,1#j,0#k,0#l,0#m,1#n,0#o,0#p,0".split('#')}
+
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=int(c.split(',')[1])) for c in
+             "a,314#b,6#c,271#d,28#e,0#f,561#g,3#h,17#i,6#j,2#k,1#l,401#m,641#n,257#o,271#p,28".split('#')}
 
     # depth 0
     nodes['a'].left = nodes['b']
@@ -266,7 +290,6 @@ def sum_the_root_to_leaf_path(root):
                 if right_dict_values is not None:
                     merged_dict = {**merged_dict, **right_dict_values}
 
-                # merged_dict = {**left_dict_values, **right_dict_values}
                 for key in merged_dict.keys():
                     if merged_dict[key]:
                         merged_dict[key].extend(node.data)
@@ -283,7 +306,70 @@ def sum_the_root_to_leaf_path(root):
     return res
 
 
+# 9.6 Match sum for the path
+def match_sum(root, sum_no):
+    def calculate_sum(node, partial_sum):
+        if not node:
+            return 0
+
+        partial_sum += node.data
+        if partial_sum == sum_no:
+            node_names.append(node.name)
+            return partial_sum
+        calculate_sum(node.left, partial_sum)
+        calculate_sum(node.right, partial_sum)
+
+    node_names = []
+    calculate_sum(root, 0)
+    return node_names
+
+
+def sum_root_to_leaf_path(node, partial_sum=0):
+    if not node:
+        return 0
+
+    partial_sum = 2 * partial_sum + node.data
+    if not node.left and not node.right:
+        return partial_sum
+
+    return (sum_root_to_leaf_path(node.left, partial_sum) +
+            sum_root_to_leaf_path(node.right, partial_sum))
+
+
+# 9.7 Implement an inorder traversal without recursion
+def traverse_in_order_stack(root):
+    stack = Stack()
+    stack.push(root)
+    result = []
+    while stack.has_item():
+        ele: BTNode = stack.pop()
+        if not ele.exploded and not ele.is_leaf():
+            if ele.right:
+                stack.push(ele.right)
+            ele.exploded = True
+            stack.push(ele)
+            if ele.left:
+                stack.push(ele.left)
+            continue
+
+        result.append(ele.name)
+    return result
+
+
+def traverse_in_order_two_stack(root):
+    processing_stack, result = [], []
+
+    while processing_stack or root:
+        if root:
+            processing_stack.append(root)
+            root = root.left
+        else:
+            item = processing_stack.pop()
+            result.append(item)
+            root = item.right
+    return result
+
+
 if __name__ == "__main__":
     tree = build_tree_dict()
-    parent = sum_the_root_to_leaf_path(tree['a'])
-    print(parent)
+    traverse_in_order_stack(tree['a'])

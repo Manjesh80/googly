@@ -23,3 +23,19 @@ def test_lca_with_parent():
     tree = build_tree_dict_with_parent()
     parent = lca_with_parent(tree['m'], tree['p'])
     assert parent.data == 'i'
+
+
+# 9.6 Match sum for the path
+# pytest EPI\tests\test_binary_tree.py::sum_the_root_to_leaf_path
+def test_match_sum():
+    tree = build_tree_dict()
+    parent = sum_the_root_to_leaf_path(tree['a'])
+    parent = match_sum(tree['a'], 591)
+    assert len(parent) == 2
+
+
+# 9.7 Implement an inorder traversal without recursion
+# pytest -s EPI\tests\test_binary_tree.py::test_traverse_in_order_stack
+def test_traverse_in_order_stack():
+    res = traverse_in_order_stack(build_tree_dict()['a'])
+    assert len(res) == 16
