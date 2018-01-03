@@ -2,7 +2,8 @@ from collections import namedtuple
 
 
 class BTNode:
-    def __init__(self, *, data, name, left=None, right=None, parent=None, kids=-1, exploded=False):
+    def __init__(self, *, data, name, left=None, right=None, parent=None, kids=-1, exploded=False, rlink=None,
+                 is_locked=False):
         self.data = data
         self.name = name
         self.left = left
@@ -11,9 +12,31 @@ class BTNode:
         self.parent = parent
         self.exploded = exploded
         self.kids = kids
+        self.rlink = rlink
+        self.is_locked = is_locked
+
+    def is_locked(self):
+        return self.is_locked
+
+    def acquire_lock(self):
+        if not self.is_locked:
+            self.is_locked = True
+            return True
+        else:
+            return False
+
+    def release_lock(self):
+        if self.is_locked:
+            self.is_locked = False
+            return True
+        else:
+            return False
 
     def is_leaf(self):
         return not self.left and not self.right
+
+    def is_not_leaf_and_balanced(self):
+        return self.left and self.right
 
     def has_parent(self):
         return self.parent is not None
@@ -89,6 +112,35 @@ def build_symmetric_tree():
     nodes['f'].left = nodes['g']
 
     return nodes['a']
+
+
+def build_perfect_tree():
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=c.split(',')[0]) for c in
+             "a#b#c#d#e#f#g#h#i#j#k#l#m#n#o".split('#')}
+
+    nodes['a'].left = nodes['b']
+    nodes['a'].right = nodes['i']
+    nodes['b'].left = nodes['c']
+    nodes['b'].right = nodes['f']
+    nodes['c'].left = nodes['d']
+    nodes['c'].right = nodes['e']
+    nodes['f'].left = nodes['g']
+    nodes['f'].right = nodes['h']
+    nodes['i'].left = nodes['j']
+    nodes['i'].right = nodes['m']
+    nodes['j'].left = nodes['k']
+    nodes['j'].right = nodes['l']
+    nodes['m'].left = nodes['n']
+    nodes['m'].right = nodes['o']
+
+    # nodes['c'].parent = nodes['b']
+    # nodes['d'].parent = nodes['c']
+    # nodes['e'].parent = nodes['c']
+    # nodes['f'].parent = nodes['b']
+    # nodes['g'].parent = nodes['f']
+    # nodes['h'].parent = nodes['f']
+
+    return nodes
 
 
 def build_tree_dict():
@@ -170,8 +222,16 @@ def build_tree():
 
 def print_in_order_traversal(root):
     print_in_order(root.left)
-    print(f" == {root.data} == ")
+    print(f" == {root.data} ")
     print_in_order(root.right)
+
+
+def print_in_order_traversal_with_rlink(root):
+    if root:
+        print_in_order_traversal_with_rlink(root.left)
+        if root.rlink:
+            print(f" == {root.data} has RLNIK = {root.rlink.data}")
+        print_in_order_traversal_with_rlink(root.right)
 
 
 def print_in_order(root):
@@ -606,16 +666,16 @@ def build_leaves_and_edges(root):
     def left_traverse(node):
         if node:
             result.append(node)
+            left_traverse(node.left)
             if node.right:
                 traverse_in_order_and_get_leaves(node.right)
-            left_traverse(node.left)
 
     def right_traverse(node):
         if node:
             result.append(node)
+            right_traverse(node.right)
             if node.left:
                 traverse_in_order_and_get_leaves(node.left)
-            right_traverse(node.right)
 
     def traverse_and_add(node):
         if node:
@@ -628,10 +688,90 @@ def build_leaves_and_edges(root):
     return result
 
 
+# 9.16 Fill RLink
+def build_rlink(root):
+    def emit_right_nodes(node):
+        result = []
+        if node:
+            while node:
+                result.append(node)
+                node = node.right
+        return result
+
+    def emit_left_nodes(node):
+        result = []
+        if node:
+            while node:
+                result.append(node)
+                node = node.left
+        return result
+
+    def marry_right_to_left(righties, lefties):
+        for rightie, leftie in zip(righties, lefties):
+            rightie.rlink = leftie
+
+    def build_rlink_inorder(root: BTNode):
+        if root:
+            left_node = build_rlink_inorder(root.left)
+            right_node = build_rlink_inorder(root.right)
+
+            righties = emit_right_nodes(left_node)
+            lefties = emit_left_nodes(right_node)
+
+            if righties and lefties:
+                marry_right_to_left(righties, lefties)
+            return root
+
+    return build_rlink_inorder(root)
+
+
+def construct_right_sibling(tree):
+    def populate_children_next_filed(start_node):
+        while start_node and start_node.left:
+            start_node.left.rlink = start_node.right
+            start_node.right.rlink = start_node.rlink and start_node.rlink.left
+            start_node = start_node.rlink
+
+    while tree and tree.left:
+        populate_children_next_filed(tree)
+        tree = tree.left
+
+
+# 9.17 Build lock API
+def any_child_lock(node: BTNode):
+    if node:
+        left_state = any_child_lock(node.left)
+        right_state = any_child_lock(node.right)
+        return node.is_locked or left_state or right_state
+
+
+def any_parent_lock(node):
+    result = False
+    while node:
+        result = result or node.is_locked
+        node = node.parent
+    return result
+
+
+def lock_node(node):
+    if not any_child_lock(node) and not any_parent_lock(node):
+        res = node.acquire_lock()
+        if res:
+            return res
+        else:
+            raise ValueError("Cannot get lock")
+    else:
+        return False
+
+
+def unlock_node(node):
+    return node.release_lock()
+
+
 if __name__ == "__main__":
-    nodes = build_tree_dict_with_parent()
-    res = build_leaves_and_edges(nodes['a'])
-    [print(x.name) for x in res]
+    node = build_tree_dict_with_parent()
+    print()
+    print(lock_node(node['e']))
 
 #
 #
