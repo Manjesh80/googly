@@ -80,3 +80,23 @@ def test_find_successor_epi():
     assert find_successor_epi(nodes['n']).name == 'i'
     assert find_successor_epi(nodes['i']).name == 'o'
     assert find_successor_epi(nodes['o']).name == 'p'
+
+
+# 9.13 Reconstruct a binary tree with markers
+# pytest -s EPI\tests\test_binary_tree.py::test_build_pre_order_tree
+def test_build_pre_order_tree():
+    pre_order = ['H', 'B', 'F', None, None, 'E', 'A', None, None, None, 'C', None, 'D', None, 'G', 'I', None, None,
+                 None]
+    q = Queue(pre_order)
+    node = build_pre_order_tree(q)
+    assert node.data == 'H'
+    assert node.left.data == 'B'
+    assert node.right.data == 'C'
+
+
+# 9.15 build leaves and edges
+# pytest -s EPI\tests\test_binary_tree.py::test_build_leaves_and_edges
+def test_build_leaves_and_edges():
+    nodes = build_tree_dict_with_parent()
+    res = build_leaves_and_edges(nodes['a'])
+    assert len(res) == 11

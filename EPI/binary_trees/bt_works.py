@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 
-class BTNode():
+class BTNode:
     def __init__(self, *, data, name, left=None, right=None, parent=None, kids=-1, exploded=False):
         self.data = data
         self.name = name
@@ -23,6 +23,25 @@ class BTNode():
 
     def is_right_child(self):
         return self.parent and self.parent.right and self.parent.right == self
+
+
+class Queue:
+    def __init__(self, load=[]):
+        self.data = load
+
+    def enqueue(self, value):
+        self.data.append(value)
+
+    def empty(self):
+        return len(self.data) == 0
+
+    def not_empty(self):
+        return len(self.data) > 0
+
+    def dequeue(self):
+        res = self.data[0]
+        del self.data[0]
+        return res
 
 
 class Stack():
@@ -564,18 +583,55 @@ def build_binary_tree_epi(preorder, inorder):
     return build_binary_tree_helper(0, len(preorder), 0, len(inorder))
 
 
+# 9.13 Reconstruct a binary tree with markers
+def build_pre_order_tree(q: Queue):
+    if q.not_empty():
+        value = q.dequeue()
+        if value:
+            parent = BTNode(name=value, data=value,
+                            left=build_pre_order_tree(q),
+                            right=build_pre_order_tree(q))
+            return parent
+
+
+# 9.15 build leaves and edges
+def build_leaves_and_edges(root):
+    def traverse_in_order_and_get_leaves(node: BTNode):
+        if node:
+            traverse_in_order_and_get_leaves(node.left)
+            if node.is_leaf():
+                result.append(node)
+            traverse_in_order_and_get_leaves(node.right)
+
+    def left_traverse(node):
+        if node:
+            result.append(node)
+            if node.right:
+                traverse_in_order_and_get_leaves(node.right)
+            left_traverse(node.left)
+
+    def right_traverse(node):
+        if node:
+            result.append(node)
+            if node.left:
+                traverse_in_order_and_get_leaves(node.left)
+            right_traverse(node.right)
+
+    def traverse_and_add(node):
+        if node:
+            result.append(node)
+            left_traverse(node.left)
+            right_traverse(node.right)
+
+    result = []
+    traverse_and_add(root)
+    return result
+
+
 if __name__ == "__main__":
     nodes = build_tree_dict_with_parent()
-    # preorder = ['H', 'B', 'F', 'E', 'A', 'C', 'D', 'G', 'I']
-    # inorder = ['F', 'B', 'A', 'E', 'H', 'C', 'D', 'I', 'G']
-
-    preorder = ['H', 'B', 'F', 'E', 'A']
-    inorder = ['F', 'B', 'A', 'E', 'H']
-
-    # preorder = ['B', 'F', 'E', 'A']
-    # inorder = ['F', 'B', 'A', 'E']
-    result = build_binary_tree_epi(preorder, inorder)
-    print_pre_order(result)
+    res = build_leaves_and_edges(nodes['a'])
+    [print(x.name) for x in res]
 
 #
 #
