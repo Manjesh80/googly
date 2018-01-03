@@ -2,21 +2,27 @@ from collections import namedtuple
 
 
 class BTNode():
-    def __init__(self, *, data, name, left=None, right=None, parent=None, exploded=False):
+    def __init__(self, *, data, name, left=None, right=None, parent=None, kids=-1, exploded=False):
         self.data = data
         self.name = name
         self.left = left
         self.right = right
         self.depth = -1
         self.parent = parent
-        self.exploded = False
+        self.exploded = exploded
+        self.kids = kids
 
     def is_leaf(self):
         return not self.left and not self.right
 
-        # def __str__(self):
-        #     return str.format(" Name ==> " + self.name +
-        #                       " Data ==> " + self.data)
+    def has_parent(self):
+        return self.parent is not None
+
+    def is_left_child(self):
+        return self.parent and self.parent.left and self.parent.left == self
+
+    def is_right_child(self):
+        return self.parent and self.parent.right and self.parent.right == self
 
 
 class Stack():
@@ -72,6 +78,23 @@ def build_tree_dict():
 
     nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=int(c.split(',')[1])) for c in
              "a,314#b,6#c,271#d,28#e,0#f,561#g,3#h,17#i,6#j,2#k,1#l,401#m,641#n,257#o,271#p,28".split('#')}
+
+    nodes['a'].kids = 15
+    nodes['b'].kids = 6
+    nodes['c'].kids = 2
+    nodes['d'].kids = 0
+    nodes['e'].kids = 0
+    nodes['f'].kids = 2
+    nodes['g'].kids = 1
+    nodes['h'].kids = 0
+    nodes['i'].kids = 7
+    nodes['j'].kids = 4
+    nodes['k'].kids = 3
+    nodes['n'].kids = 0
+    nodes['l'].kids = 1
+    nodes['m'].kids = 0
+    nodes['o'].kids = 1
+    nodes['p'].kids = 0
 
     # depth 0
     nodes['a'].left = nodes['b']
@@ -157,13 +180,14 @@ def print_in_order_new(root):
 
 
 def print_pre_order(root):
-    print(f" <==> {root.data} == {root.depth} <==>")
+    if root:
+        print(f" <==> {root.name} <==>")
 
-    if root.left:
-        print_pre_order(root.left)
+        if root.left:
+            print_pre_order(root.left)
 
-    if root.right:
-        print_pre_order(root.right)
+        if root.right:
+            print_pre_order(root.right)
 
 
 def print_post_order(root):
@@ -370,6 +394,243 @@ def traverse_in_order_two_stack(root):
     return result
 
 
+# 9.8 Implement an inorder traversal without recursion
+def traverse_pre_order_stack(root):
+    stack = Stack()
+    stack.push(root)
+    result = []
+    while stack.has_item():
+        ele: BTNode = stack.pop()
+        if not ele.exploded and not ele.is_leaf():
+            if ele.right:
+                stack.push(ele.right)
+            if ele.left:
+                stack.push(ele.left)
+            ele.exploded = True
+            stack.push(ele)
+            continue
+
+        result.append(ele.name)
+    return result
+
+
+def traverse_pre_order_two_stack(root):
+    processing_stack, result = [], []
+    while processing_stack or root:
+        if root:
+            result.append(root.name)
+            processing_stack.append(root.right)
+            root = root.left
+        else:
+            root = processing_stack.pop()
+    return result
+
+
+# 9.9 Compute the Kth node in In order traversal
+# [ D , C , E , B, F, H, G , A , J , L, M , K , N , I, O , P]
+# k = 6 ==> H
+def compute_kth_node_in_order_travresal(root, k):
+    def travel(node, n):
+        if not node:
+            return None
+        left_count = node.left.kids + 1 if node.left else 0
+        current_node_index = left_count + 1
+
+        if n == current_node_index:
+            return node
+        elif n <= left_count:
+            return travel(node.left, n)
+        elif n > left_count + 1:
+            return travel(node.right, n - (left_count + 1))
+
+    if k > root.kids + 1:
+        raise AttributeError("K should be lesser than root count")
+    res = travel(root, k)
+    return res
+
+
+def find_succ(root, match):
+    def find_match(a, b):
+
+        if a:
+            return a if a is b else None
+
+    def find_successor(root, match):
+        while root:
+            if root:
+                found = find_match(root.left, match)
+                if found:
+                    return found
+                if root is match:
+                    return root.right
+                return find_successor(root.right, match)
+            else:
+                return None
+
+    return find_successor(root, match)
+
+
+# 9.10 Compute the successor
+def find_successor(root, match):
+    def process_in_order(root):
+        if root:
+            if root.left and root.left is not match and len(match_added) == 1 and len(successor) == 0:
+                successor.append(root.left)
+                return
+            process_in_order(root.left)
+            if root is match:
+                match_added.append(True)
+            if root is not match and len(match_added) == 1 and len(successor) == 0:
+                successor.append(root)
+                return
+            process_in_order(root.right)
+
+    successor = []
+    match_added = []
+    process_in_order(root)
+    return successor[0]
+
+
+def find_successor_epi(node):
+    if node.right:
+        node = node.right
+        while node.left:
+            node = node.left
+        return node
+
+    while node.parent and node.parent.right is node:
+        node = node.parent
+
+    return node.parent
+
+
+# 9.11 Traverse in order
+def traverse_in_order(tree: BTNode):
+    prev: BTNode = None
+    result = []
+
+    while tree:
+        if prev is tree.parent:
+            if tree.left:
+                next = tree.left
+            else:
+                result.append(tree.name)
+                next = tree.right or tree.parent
+        elif tree.left is prev:
+            result.append(tree.name)
+            next = tree.right or tree.parent
+        else:
+            next = tree.parent
+
+        prev, tree = tree, next
+
+    return result
+
+
+# 9.12 Reconstruct a binary tree from traversal data
+# inorder  ==> {  F, B, A , E, H , C , D , I , G }
+# preorder ==> { H , B, F, E , A , C , D , G, I }
+def build_binary_tree(preorder, inorder):
+    def build_binary_tree_helper(pre_order_start, pre_order_end, inorder_start, inorder_end):
+        if pre_order_start > pre_order_end or inorder_start > inorder_end:
+            return None
+        left_tree_size = inorder.index(preorder[pre_order_start]) + 1
+
+        return BTNode(data=preorder[pre_order_start], name=preorder[pre_order_start],
+                      left=build_binary_tree_helper(pre_order_start + 1, left_tree_size - 1, pre_order_start,
+                                                    left_tree_size),
+                      right=build_binary_tree_helper(left_tree_size + 1, pre_order_end, left_tree_size + 1, inorder_end)
+                      )
+
+    return build_binary_tree_helper(0, len(preorder) - 1, 0, len(inorder) - 1)
+
+
+def build_binary_tree_epi(preorder, inorder):
+    node_to_inorder_idx = {data: i for i, data in enumerate(inorder)}
+
+    def build_binary_tree_helper(pre_order_start, pre_order_end, inorder_start, inorder_end):
+        if pre_order_start >= pre_order_end or inorder_start >= inorder_end:
+            return None
+
+        root_inorder_index = node_to_inorder_idx[preorder[pre_order_start]]
+        left_tree_size = root_inorder_index - inorder_start
+
+        return BTNode(data=preorder[pre_order_start], name=preorder[pre_order_start],
+                      left=build_binary_tree_helper(pre_order_start + 1, pre_order_start + 1 + left_tree_size,
+                                                    inorder_start, root_inorder_index),
+                      right=build_binary_tree_helper(pre_order_start + 1 + left_tree_size, pre_order_end,
+                                                     root_inorder_index + 1, inorder_end))
+
+    return build_binary_tree_helper(0, len(preorder), 0, len(inorder))
+
+
 if __name__ == "__main__":
-    tree = build_tree_dict()
-    traverse_in_order_stack(tree['a'])
+    nodes = build_tree_dict_with_parent()
+    # preorder = ['H', 'B', 'F', 'E', 'A', 'C', 'D', 'G', 'I']
+    # inorder = ['F', 'B', 'A', 'E', 'H', 'C', 'D', 'I', 'G']
+
+    preorder = ['H', 'B', 'F', 'E', 'A']
+    inorder = ['F', 'B', 'A', 'E', 'H']
+
+    # preorder = ['B', 'F', 'E', 'A']
+    # inorder = ['F', 'B', 'A', 'E']
+    result = build_binary_tree_epi(preorder, inorder)
+    print_pre_order(result)
+
+#
+#
+#
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+# comment to keep code on top
+
+
+# comment to keep code on top

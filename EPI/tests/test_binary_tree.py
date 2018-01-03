@@ -39,3 +39,44 @@ def test_match_sum():
 def test_traverse_in_order_stack():
     res = traverse_in_order_stack(build_tree_dict()['a'])
     assert len(res) == 16
+
+
+# 9.10 Compute the successor
+# pytest -s EPI\tests\test_binary_tree.py::test_find_successor
+def test_find_successor():
+    nodes = build_tree_dict()
+    assert find_successor(nodes['a'], nodes['d']).name == 'c'
+    assert find_successor(nodes['a'], nodes['c']).name == 'e'
+    assert find_successor(nodes['a'], nodes['e']).name == 'b'
+    assert find_successor(nodes['a'], nodes['b']).name == 'f'
+    assert find_successor(nodes['a'], nodes['f']).name == 'h'
+    assert find_successor(nodes['a'], nodes['h']).name == 'g'
+    assert find_successor(nodes['a'], nodes['g']).name == 'a'
+    assert find_successor(nodes['a'], nodes['a']).name == 'j'
+    assert find_successor(nodes['a'], nodes['j']).name == 'l'
+    assert find_successor(nodes['a'], nodes['l']).name == 'm'
+    assert find_successor(nodes['a'], nodes['m']).name == 'k'
+    assert find_successor(nodes['a'], nodes['k']).name == 'n'
+    assert find_successor(nodes['a'], nodes['n']).name == 'i'
+    assert find_successor(nodes['a'], nodes['i']).name == 'o'
+    assert find_successor(nodes['a'], nodes['o']).name == 'p'
+
+
+# pytest -s EPI\tests\test_binary_tree.py::test_find_successor_epi
+def test_find_successor_epi():
+    nodes = build_tree_dict_with_parent()
+    assert find_successor_epi(nodes['d']).name == 'c'
+    assert find_successor_epi(nodes['c']).name == 'e'
+    assert find_successor_epi(nodes['e']).name == 'b'
+    assert find_successor_epi(nodes['b']).name == 'f'
+    assert find_successor_epi(nodes['f']).name == 'h'
+    assert find_successor_epi(nodes['h']).name == 'g'
+    assert find_successor_epi(nodes['g']).name == 'a'
+    assert find_successor_epi(nodes['a']).name == 'j'
+    assert find_successor_epi(nodes['j']).name == 'l'
+    assert find_successor_epi(nodes['l']).name == 'm'
+    assert find_successor_epi(nodes['m']).name == 'k'
+    assert find_successor_epi(nodes['k']).name == 'n'
+    assert find_successor_epi(nodes['n']).name == 'i'
+    assert find_successor_epi(nodes['i']).name == 'o'
+    assert find_successor_epi(nodes['o']).name == 'p'
