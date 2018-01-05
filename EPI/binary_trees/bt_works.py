@@ -252,7 +252,7 @@ def print_in_order_new(root):
     if root.left:
         print_in_order_new(root.left)
 
-    print(f" <==> {root.data} <==>")
+    print(f" <==> {root.name} <==>")
 
     if root.right:
         print_in_order_new(root.right)
@@ -768,10 +768,47 @@ def unlock_node(node):
     return node.release_lock()
 
 
+# TODO Reimplement 9.11 and 9.12
+# 9.12 Reconstruct a binary tree from traversal data
+# inorder  ==> {  F, B, A , E, H , C , D , I , G }
+# preorder ==> { H , B, F, E , A , C , D , G, I }
+def build_binary_tree_ext(preorder, inorder):
+    def build_node(anchor, por, ior):
+        if anchor:
+            anchor_ior_index = ior.index(anchor) if ior and ior.count(anchor) > 0 else -1
+            anchor_por_index = por.index(anchor) if por and por.count(anchor) > 0 else -1
+
+            lst = ior[0:anchor_ior_index]
+            rst = ior[(anchor_ior_index + 1): len(ior)]
+
+            node = BTNode(data=anchor, name=anchor)
+
+            if len(lst) > 0:
+                left_anchor = por[anchor_por_index + 1]
+                left_por = por[anchor_por_index:anchor_ior_index + 1]
+                left_ior = ior[0:anchor_ior_index]
+                left_node = build_node(left_anchor, left_por, left_ior)
+                node.left = left_node
+
+            if len(rst) > 0:
+                right_anchor = por[anchor_por_index + 1 + len(lst)]
+                right_por = por[anchor_ior_index + 1:len(por)]
+                right_ior = ior[anchor_ior_index + 1:len(ior)]
+                right_node = build_node(right_anchor, right_por, right_ior)
+                node.right = right_node
+
+            return node
+
+    return build_node(preorder[0], preorder, inorder)
+
+
 if __name__ == "__main__":
-    node = build_tree_dict_with_parent()
-    print()
-    print(lock_node(node['e']))
+    preorder = ['H', 'B', 'F', 'E', 'A', 'C', 'D', 'G', 'I']
+    inorder = ['F', 'B', 'A', 'E', 'H', 'C', 'D', 'I', 'G']
+    # preorder = ['H', 'B', 'F', 'E', 'A']
+    # inorder = ['F', 'B', 'A', 'E', 'H']
+    node = build_binary_tree_ext(preorder, inorder)
+    print_in_order_new(node)
 
 #
 #
