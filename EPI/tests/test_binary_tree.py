@@ -22,7 +22,7 @@ def test_is_tree_symmetric():
 def test_lca_with_parent():
     tree = build_tree_dict_with_parent()
     parent = lca_with_parent(tree['m'], tree['p'])
-    assert parent.data == 'i'
+    assert parent.name == 'i'
 
 
 # 9.6 Match sum for the path
