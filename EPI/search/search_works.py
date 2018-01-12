@@ -1,4 +1,6 @@
 import math
+import random
+import operator
 
 
 # 11.1 Find first occurrence of where array has duplicates
@@ -100,5 +102,52 @@ def calculate_real_root(num):
     return left
 
 
+# 11.8 Find the k-th largest with O(n) best case O(n**2) worst case,
+# we can achieve a static of (n log k) with space of O( log k)
+def find_kth_largest(k, A, B):
+    def find_kth(comp):
+        def partition_around_pivot(left, right, pivot_idx):
+            pivot_value = A[pivot_idx]
+            new_pivot_idx = left
+            l[0] += 1
+            print(f"********* Iteration {l[0] } *********")
+            print(f" Original input ==> {B} ")
+            print(f" Modified input ==> {A} ")
+            print(f" Pivot Index = {pivot_idx} ==> Pivot Value => {pivot_value} ")
+
+            A[pivot_idx], A[right] = A[right], A[pivot_idx]
+            for i in range(left, right):
+                if comp(A[i], pivot_value):
+                    A[i], A[new_pivot_idx] = A[new_pivot_idx], A[i]
+                    new_pivot_idx += 1
+            A[right], A[new_pivot_idx] = A[new_pivot_idx], A[right]
+            print(f"Array changed ==> {A}")
+            print(f"********* Iteration {l[0] } END *********")
+            return new_pivot_idx
+
+        left, right = 0, len(A) - 1
+        while left <= right:
+            pivot_idx = random.randint(left, right)
+            new_pivot_idx = partition_around_pivot(left, right, pivot_idx)
+            print('************')
+            print(A)
+            print('************')
+            if new_pivot_idx == k - 1:
+                return A[new_pivot_idx]
+            elif new_pivot_idx > k - 1:
+                right = new_pivot_idx - 1
+            else:
+                left = new_pivot_idx + 1
+
+    l = [0]
+    return find_kth(operator.gt)
+
+
 if __name__ == "__main__":
-    print(calculate_real_root(99))
+    input = random.sample(range(1, 11), 10)
+    # input = [10, 9, 8, 2, 5, 4, 1, 6, 7, 3]
+    print('**********************')
+    print(input)
+    print('**********************')
+    print(find_kth_largest(4, input, input))
+    print('**********************')

@@ -3,6 +3,7 @@ from collections import Counter
 from functools import reduce
 from collections import OrderedDict
 from heapq import *
+import sys
 
 
 class Employee_Test:
@@ -124,24 +125,234 @@ def k_most_frequent_queries(queries, k):
     return top_k
 
 
-if __name__ == "__main__":
-    queries = ['Query1', 'Query2', 'Query3', 'Query4', 'Query1', 'Query2', 'Query2',
-               'Query1', 'Query4', 'Query1', 'Query4', 'Query1', 'Query4', 'Query1',
-               'Query1', 'Query4', 'Query1', 'Query4', 'Query1', 'Query4', 'Query1']
-    res = k_most_frequent_queries(queries,2)
-    print(res)
-    # top_k = []
-    # for c_k_v in c.items():
-    #     if len(top_k) < 2:
-    #         heappush(top_k, (c_k_v[1], c_k_v[0]))
-    #     else:
-    #         poppie = heappushpop(top_k, (c_k_v[1], c_k_v[0]))
-    #         print(f"Evicted ==> {poppie[1]} -> {poppie[0]}")
-    #
-    # print("************ - *********** ")
-    # print(top_k)
-    # print("************ - *********** ")
-    # print(c.most_common(2))
-    # print("************ - *********** ")
+# 12.7 Find the smallest Sub Array covering all values
+def find_smallest_subarray_covering_subset(stream, query_strings):
+    class DoublyLinkedListNode:
+        def __init__(self, data=None):
+            self.data = data
+            self.prev = self.next = None
 
-    # top_queries = k_most_frequent_queries()
+    class LinkedList:
+        def __init__(self):
+            self.head = self.tail = None
+            self._size = 0
+
+        def __len__(self):
+            return self._size
+
+        def insert_after(self, value):
+            node = DoublyLinkedListNode(value)
+            node.prev = self.tail
+            if self.tail:
+                self.tail.next = node
+            else:
+                self.head = node
+            self.tail = node
+            self._size += 1
+
+        def remove(self, node):
+            if node.next:
+                node.next.prev = node.prev
+            else:
+                self.tail = node.prev
+
+            if node.prev:
+                node.prev.next = node.next
+            else:
+                self.head = node.next
+            node.next = node.prev = None
+            self._size -= 1
+
+        def __repr__(self):
+            return self.str_rep()
+
+        def __str__(self):
+            return self.str_rep()
+
+        def str_rep(self):
+            try:
+                res = ""
+                curr = self.head
+                while curr:
+                    res += str(curr.data) + "( " + str(stream[curr.data]) + " ) " + " ==> "
+                    curr = curr.next
+                return res
+            except:
+                e = sys.exc_info()[0]
+                print(e)
+
+            return 'Got Error'
+
+    loc = LinkedList()
+    d = {s: None for s in query_strings}
+    res = (-1, -1)
+
+    for idx, s in enumerate(stream):
+        if s in d:
+            it = d[s]
+            if it is not None:
+                loc.remove(it)
+            loc.insert_after(idx)
+            d[s] = loc.tail
+
+            if len(loc) == len(query_strings):
+                if res == (-1, -1) or idx - loc.head.data < res[1] - res[0]:
+                    res = (loc.head.data, idx)
+    return res
+
+
+# 12.7 Find the smallest Sub Array covering all values
+def find_smallest_subarray_covering_subset_with_odict(stream, query_strings):
+    loc = OrderedDict()
+    d = {s for s in query_strings}
+    res = (-1, -1)
+
+    for idx, s in enumerate(stream):
+        if s in d:
+            loc.pop(s, None)
+            loc[s] = idx
+            if len(loc) == len(query_strings):
+                start_index = next(iter(loc.items()))[1]
+                if res == (-1, -1) or idx - start_index < res[1] - res[0]:
+                    res = (start_index, idx)
+    return res
+
+
+# 12.8 Find the smallest Sub Array sequentially covering all values
+def find_smallest_subarray_sequentially_covering_subset_with_odict(stream, query_strings):
+    loc = OrderedDict()
+    o_d = OrderedDict()
+    for q_s in query_strings:
+        o_d[q_s] = q_s
+    res = (-1, -1)
+
+    o_d_iter = iter(o_d.items())
+    next_char = next(o_d_iter)[0]
+    for idx, s in enumerate(stream):
+        if s in o_d and s == next_char:
+            loc.pop(s, None)
+            loc[s] = idx
+            if len(loc) == len(query_strings):
+                start_index = next(iter(loc.items()))[1]
+                if res == (-1, -1) or idx - start_index < res[1] - res[0]:
+                    res = (start_index, idx)
+                o_d_iter = iter(o_d.items())
+                loc.clear()
+
+            next_char = next(o_d_iter)[0]
+    return res
+
+
+# 12.9 Find longest sub-array with distinct entries
+# ['f', 's', 'f', 'e', 't', 'w', 'e', 'n', 'w', 'e']
+def find_the_longest_sub_array_with_distinct_entries(words):
+    dist_dict = OrderedDict()
+    result = (-1, -1)
+    curr_result_start = 0
+    for idx, w in enumerate(words):
+        if w in dist_dict:
+            curr_result = (curr_result_start, idx - 1)
+            result = result if result_greater(result, curr_result) else curr_result
+            curr_result_start = trim_left_until(w, dist_dict)
+        else:
+            dist_dict[w] = idx
+
+    curr_result = (curr_result_start, len(words) - 1)
+    result = result if result_greater(result, curr_result) else curr_result
+
+    return result
+
+
+def trim_left_until(w, dist_dict):
+    new_start_index = 0
+    while len(dist_dict) > 0:
+        head = next(iter(dist_dict.items()))
+        if w == head[0]:
+            dist_dict.popitem(False)
+            new_start_index = next(iter(dist_dict.items()))[1]
+        else:
+            dist_dict.popitem(False)
+    return new_start_index
+
+
+def result_greater(this, that):
+    return this[1] - this[0] > that[1] - that[0]
+
+
+# 12.10 Find the length of the longest contained interval
+def len_of_longest_contained_interval(nums):
+    nums = set(nums)
+    long_run = 0
+    while len(nums) > 0:
+        current_value = nums.pop()
+        lower_bound_count = 0
+        lower_bound = current_value - 1
+        while lower_bound in nums:
+            nums.remove(lower_bound)
+            lower_bound -= 1
+            lower_bound_count += 1
+
+        upper_bound = current_value + 1
+        upper_bound_count = 0
+        while upper_bound in nums:
+            nums.remove(upper_bound)
+            upper_bound += 1
+            upper_bound_count += 1
+        new_run = (lower_bound_count + upper_bound_count + 1)
+        long_run = long_run if long_run > new_run else new_run
+
+    return long_run
+
+
+# 12.11 Find the student with top three scores
+def top_three_scores(scores):
+    student_dict = defaultdict(list)
+    for score in scores:
+        name, test_score = score.split(',')[0], int(score.split(',')[1])
+        if len(student_dict[name]) >= 3:
+            heappushpop(student_dict[name], test_score)
+        else:
+            student_dict[name].append(test_score)
+
+    added_score = []
+    for student_con in student_dict.items():
+        if len(student_con[1]) <= 3:
+            added_score.append(sum(student_con[1]))
+
+    return max(added_score)
+
+
+# 12.2 Compute all String decomposition
+def compute_all_decomposition(sentence, words):
+    unit_size = len(words[0])
+    words_with_freq = Counter(words)
+
+    def decomposition_present(start, end):
+        sentence_word_frequency = {}
+        for i in range(start, end, unit_size):
+            curr_word = sentence[i: i + unit_size]
+            if curr_word in words_with_freq:
+                sentence_word_frequency[curr_word] = 1 if sentence_word_frequency.get(curr_word) is None else (
+                        sentence_word_frequency.get(curr_word) + 1)
+                curr_word_master_freq = words_with_freq[curr_word]
+                curr_word_sentence_freq = sentence_word_frequency[curr_word]
+                if curr_word_sentence_freq > curr_word_master_freq:
+                    return False
+                if len(sentence_word_frequency) == len(words_with_freq):
+                    return True
+            else:
+                return False
+
+    for i in range(0, len(sentence)):
+        if decomposition_present(i, len(sentence)):
+            return sentence[i: i + (len(words) * len(words[0]))]
+
+
+if __name__ == "__main__":
+    sentence = 'amanaplanacanapl'
+    sentence = 'xxxcanaplanaaplzzz'
+    words = ['can', 'apl', 'ana', 'apl']
+    # sentence = 'can'
+    # words = ['can']
+    res = compute_all_decomposition(sentence, words)
+    print(res)

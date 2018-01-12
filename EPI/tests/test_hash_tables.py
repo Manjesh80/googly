@@ -78,3 +78,51 @@ def test_k_most_frequent_queries():
     res = k_most_frequent_queries(queries, 2)
     assert res[0][1] == 'Query4'
     assert res[1][1] == 'Query1'
+
+
+# 12.7 Find the smallest Sub Array covering all values
+# pytest -s EPI\tests\test_hash_tables.py::test_find_smallest_subarray_covering_subset_with_odict
+def test_find_smallest_subarray_covering_subset_with_odict():
+    stream = [s for s in 'deefdef']
+    query_strings = ['d', 'e', 'f']
+    res = find_smallest_subarray_covering_subset_with_odict(stream, query_strings)
+    assert res[0] == 2
+    assert res[1] == 4
+
+
+# 12.8 Find the smallest Sub Array sequentially covering all values
+# pytest -s EPI\tests\test_hash_tables.py::test_find_smallest_subarray_sequentially_covering_subset_with_odict
+def test_find_smallest_subarray_sequentially_covering_subset_with_odict():
+    stream = [s for s in 'abcefefadeefdefaac']
+    stream = [s for s in 'deefdef']
+    query_strings = ['d', 'e', 'f']
+    res = find_smallest_subarray_sequentially_covering_subset_with_odict(stream, query_strings)
+    assert res[0] == 4
+    assert res[1] == 6
+
+
+# 12.9 Find longest sub-array with distinct entries
+# pytest -s EPI\tests\test_hash_tables.py::test_find_the_longest_sub_array_with_distinct_entries
+def test_find_the_longest_sub_array_with_distinct_entries():
+    stream = [s for s in 'abacdac']
+    res = find_the_longest_sub_array_with_distinct_entries(stream)
+    assert res[0] == 1
+    assert res[1] == 5
+
+
+# 12.10 Find the length of the longest contained interval
+# pytest -s EPI\tests\test_hash_tables.py::test_len_of_longest_contained_interval
+def test_len_of_longest_contained_interval():
+    nums = [3, -2, 7, 9, 8, 1, 2, 0, -1, 5, 8]
+    assert 6 == len_of_longest_contained_interval(nums)
+
+
+# 12.11 Find the student with top three scores
+# pytest -s EPI\tests\test_hash_tables.py::test_top_three_scores
+def test_top_three_scores():
+    scores = ['Ganesh,100', 'Ganesh,100', 'Ganesh,100', 'Ganesh,100', 'Ganesh,100', 'Ganesh,100', 'Ganesh,100',
+              'Ganesh1,10', 'Ganesh2,20', 'Ganesh3,30', 'Ganesh4,40', 'Ganesh5,50', 'Ganesh6,60', 'Ganesh7,70',
+              'Ganesh1,10', 'Ganesh2,20', 'Ganesh3,30', 'Ganesh4,40', 'Ganesh5,50', 'Ganesh6,60', 'Ganesh7,70',
+              'Ganesh1,10', 'Ganesh2,20', 'Ganesh3,30', 'Ganesh4,40', 'Ganesh5,50', 'Ganesh6,60', 'Ganesh7,70',
+              'Ganesh1,10', 'Ganesh2,20', 'Ganesh3,30', 'Ganesh4,40', 'Ganesh5,50', 'Ganesh6,60', 'Ganesh7,70']
+    assert 300 == top_three_scores(scores)
