@@ -1,6 +1,6 @@
 x & ( x - 1 ) ==> Clears the lowest set bit for example 10 ( 1010 ) will give you 8 ( 1000)
 x & ( ~ ( x - 1 ) ) ==> Gives the value 2**k where k is the lowest set bit .. example 20 (10100) --> the value of the lowest set bit is 4 ==>   20 & ( ~ ( 20 - 1 ) ) ==> yields 4
-~x & ( x + 1 ) ) ==> Lowest bit noset ==> ~x & ( x + 1 ) ) ==> ~6 & 7  ==> 1
+~x & ( x + 1 ) ) ==> Lowest bit no set ==> ~x & ( x + 1 ) ) ==> ~6 & 7  ==> 1
 
 
 4.1 Calculate parity
