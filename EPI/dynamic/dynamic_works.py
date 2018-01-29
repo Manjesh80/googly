@@ -1,5 +1,27 @@
 from collections import defaultdict
 from collections import namedtuple
+from enum import Enum
+
+
+# 16.1 different score combinations
+def num_comb_final_score(final_score, individual_play_score):
+    num_comb_for_score = [[1] + [0] * final_score for _ in individual_play_score]
+
+    for i in range(len(individual_play_score)):
+        for j in range(1, final_score + 1):
+            without_this_play = 0
+            with_this_play = 0
+            if i > 0:
+                without_this_play = num_comb_for_score[i - 1][j]
+            if j >= individual_play_score[i]:
+                with_this_play = num_comb_for_score[i][j - individual_play_score[i]]
+            num_comb_for_score[i][j] = without_this_play + with_this_play
+
+    print('***********************')
+    for score in num_comb_for_score:
+        print(score)
+    print('***********************')
+    return num_comb_for_score[-1][-1]
 
 
 # 16.3 Different ways to traverse Matrix
@@ -136,25 +158,6 @@ def optimum_subject_to_capacity_new(items, capacity):
     return optimum_subject_to_item_and_capacity(len(items) - 1, capacity)
 
 
-# 16.X Rod cutting problem
-def optimize_rod_cut(table, l):
-    def get_optimal_price(current_cut):
-        if current_cut > 0:
-            get_optimal_price(current_cut - 1)
-        if cache.get(current_cut) is not None:
-            return cache.get(current_cut)
-        max_result = 0 if table.get(current_cut) is None else table.get(current_cut)
-        for k in range(1, current_cut - 1):
-            max_result = max(max_result, (cache.get(current_cut - k) + cache.get(k)))
-        cache[current_cut] = max_result
-        return max_result
-
-    cache = defaultdict(None)
-    cache[0] = 0
-    result = get_optimal_price(l)
-    return result
-
-
 def knapsack_value(items, capacity):
     def grab_and_go(cur_item_len, cur_weight):
         if cur_item_len < 0 or cur_weight < 0:
@@ -208,27 +211,150 @@ def knapsack_value_updated(items, capacity):
     return result_cache
 
 
+# 16.X Rod cutting problem
+def optimize_rod_cut(table, l):
+    def get_optimal_price(current_cut):
+        if current_cut > 0:
+            get_optimal_price(current_cut - 1)
+        if cache.get(current_cut) is not None:
+            return cache.get(current_cut)
+        max_result = 0 if table.get(current_cut) is None else table.get(current_cut)
+        for k in range(1, current_cut - 1):
+            max_result = max(max_result, (cache.get(current_cut - k) + cache.get(k)))
+        cache[current_cut] = max_result
+        return max_result
+
+    cache = defaultdict(None)
+    cache[0] = 0
+    result = get_optimal_price(l)
+    return result
+
+
+# 16.9 pickup coins for maximum gain
+def pick_up_coins_fox_max(coins):
+    def max_profit_for_range(a, b):
+        if a > b:
+            return 0
+
+        if max_matrix[a][b] == 0:
+            i_select_a_other_select_a = max_profit_for_range(a + 2, b)
+            i_select_a_other_select_b = max_profit_for_range(a + 1, b - 1)
+            revenue_for_a = coins[a] + min(i_select_a_other_select_a, i_select_a_other_select_b)
+
+            i_select_b_other_select_a = max_profit_for_range(a + 1, b - 1)
+            i_select_b_other_select_b = max_profit_for_range(a, b - 2)
+            revenue_for_b = coins[b] + min(i_select_b_other_select_a, i_select_b_other_select_b)
+
+            max_matrix[a][b] = max(revenue_for_a, revenue_for_b)
+        return max_matrix[a][b]
+
+    max_matrix = [[0] * len(coins) for _ in coins]
+    max_profit_for_range(0, len(coins) - 1)
+    return max_matrix
+
+
+class EdOp(Enum):
+    Unprocessed = 0
+    Delete = 1
+    Insert = 2
+    Substitute = 3
+    Copy = 4
+
+
+# 16.2 Minimum edit distance
+def minimum_edit_distance(F, T):
+    def find_edit(i, j):
+        if result[i][j][1] != EdOp.Unprocessed:
+            return
+        if i == 0:
+            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
+            result[i][j] = (j, EdOp.Insert)
+            return
+        if j == 0 and i != 0:
+            print(f" *************** ")
+            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
+            result[i][j] = (i, EdOp.Delete)
+            return
+        find_edit(i - 1, j)
+        find_edit(i, j - 1)
+        if result[i][j][1] == EdOp.Unprocessed:
+            result[i][j] = (1, EdOp.Insert)
+            print(f"Processing  Main Logic I ==> {i} <==>  j ==> {j} ")
+            top_value = result[i - 1][j][0]
+            left_value = result[i][j - 1][0]
+            diagonal_value = result[i - 1][j - 1][0]
+            are_values_same = (F[i] == T[j])
+
+            if top_value < left_value and top_value < diagonal_value:
+                result[i][j] = (top_value + 1, EdOp.Delete)
+            elif left_value < top_value and left_value < diagonal_value:
+                result[i][j] = (left_value + 1, EdOp.Insert)
+            else:
+                if are_values_same:
+                    result[i][j] = (diagonal_value, EdOp.Copy)
+                else:
+                    result[i][j] = (diagonal_value + 1, EdOp.Substitute)
+
+    result = [[(0, EdOp.Unprocessed)] * len(T) for _ in F]
+    find_edit(len(F) - 1, len(T) - 1)
+    return result
+
+
 if __name__ == "__main__":
-    # items = [(5, 60), (3, 50), (4, 70), (2, 30)]
-    # res = knapsack_value(items, 5)
-    items = [(5, 5), (6, 4), (8, 7), (4, 7)]
-    res = knapsack_value_updated(items, 13)
-    print(res)
+    res = minimum_edit_distance(" KITTEN", " KNITTING")
+    # res = minimum_edit_distance(" KI", " KNI")
+    print(res[-1][-1][0])
+    for row in res:
+        s = ""
+        for ele in row:
+            s += "(" + str(ele[0]) + "," + ele[1].name[0] + ") ||"
+        print(s)
 
-    # VW = [Item(5, 5), Item(6, 4), Item(8, 7), Item(4, 7)]
-    # max_knap_sack(VW, 13)
-    # # A = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    # A = [[*range(i, i + 3)] for i in range(1, 9, 3)]
-    # # A = [[*range(i, i + 10)] for i in range(1, 100, 10)]
-    # paths = traverse_2d_array(A, 0, 0)
-    # print(len(paths))
-
-    # (2,2)
-    # (2,1)
-    # (1,2)
-    # (1,1)
-    # (2,0)
-    # (1,0)
-    # (0,2)
-    # (0,1)
-    # (0,0)
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
