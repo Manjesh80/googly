@@ -56,3 +56,10 @@ def test_knapsack_value():
 def test_pick_up_coins_fox_max():
     res = pick_up_coins_fox_max([10, 25, 5, 1, 10, 5])
     assert res[0][-1] == 31
+
+
+# 16.10 Number of moves to climb the stairs
+# pytest -s EPI\tests\test_dynamic.py::test_num_of_moves_to_climb_stairs
+def test_num_of_moves_to_climb_stairs():
+    res = num_of_moves_to_climb_stairs(4, 3)
+    assert res == 9

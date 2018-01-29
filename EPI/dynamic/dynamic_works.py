@@ -24,6 +24,53 @@ def num_comb_final_score(final_score, individual_play_score):
     return num_comb_for_score[-1][-1]
 
 
+class EdOp(Enum):
+    Unprocessed = 0
+    Delete = 1
+    Insert = 2
+    Substitute = 3
+    Copy = 4
+
+
+# 16.2 Minimum edit distance
+def minimum_edit_distance(F, T):
+    def find_edit(i, j):
+        if result[i][j][1] != EdOp.Unprocessed:
+            return
+        if i == 0:
+            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
+            result[i][j] = (j, EdOp.Insert)
+            return
+        if j == 0 and i != 0:
+            print(f" *************** ")
+            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
+            result[i][j] = (i, EdOp.Delete)
+            return
+        find_edit(i - 1, j)
+        find_edit(i, j - 1)
+        if result[i][j][1] == EdOp.Unprocessed:
+            result[i][j] = (1, EdOp.Insert)
+            print(f"Processing  Main Logic I ==> {i} <==>  j ==> {j} ")
+            top_value = result[i - 1][j][0]
+            left_value = result[i][j - 1][0]
+            diagonal_value = result[i - 1][j - 1][0]
+            are_values_same = (F[i] == T[j])
+
+            if top_value < left_value and top_value < diagonal_value:
+                result[i][j] = (top_value + 1, EdOp.Delete)
+            elif left_value < top_value and left_value < diagonal_value:
+                result[i][j] = (left_value + 1, EdOp.Insert)
+            else:
+                if are_values_same:
+                    result[i][j] = (diagonal_value, EdOp.Copy)
+                else:
+                    result[i][j] = (diagonal_value + 1, EdOp.Substitute)
+
+    result = [[(0, EdOp.Unprocessed)] * len(T) for _ in F]
+    find_edit(len(F) - 1, len(T) - 1)
+    return result
+
+
 # 16.3 Different ways to traverse Matrix
 class Node_2D:
     def __init__(self, i, j):
@@ -253,62 +300,26 @@ def pick_up_coins_fox_max(coins):
     return max_matrix
 
 
-class EdOp(Enum):
-    Unprocessed = 0
-    Delete = 1
-    Insert = 2
-    Substitute = 3
-    Copy = 4
+# 16.10 Number of moves to climb the stairs
+def num_of_moves_to_climb_stairs(H, S):
+    def num_of_moves_to_top(T):
+        if T <= 1:
+            return 1
+        if num_of_ways_to_height[T] == 0:
+            num_of_ways = 0
+            for i in range(1, S + 1):
+                num_of_ways += num_of_moves_to_top(T - i)
+            num_of_ways_to_height[T] = num_of_ways
+        return num_of_ways_to_height[T]
 
-
-# 16.2 Minimum edit distance
-def minimum_edit_distance(F, T):
-    def find_edit(i, j):
-        if result[i][j][1] != EdOp.Unprocessed:
-            return
-        if i == 0:
-            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
-            result[i][j] = (j, EdOp.Insert)
-            return
-        if j == 0 and i != 0:
-            print(f" *************** ")
-            print(f"Processing  Zero Logic I ==> {i} <==>  j ==> {j} ")
-            result[i][j] = (i, EdOp.Delete)
-            return
-        find_edit(i - 1, j)
-        find_edit(i, j - 1)
-        if result[i][j][1] == EdOp.Unprocessed:
-            result[i][j] = (1, EdOp.Insert)
-            print(f"Processing  Main Logic I ==> {i} <==>  j ==> {j} ")
-            top_value = result[i - 1][j][0]
-            left_value = result[i][j - 1][0]
-            diagonal_value = result[i - 1][j - 1][0]
-            are_values_same = (F[i] == T[j])
-
-            if top_value < left_value and top_value < diagonal_value:
-                result[i][j] = (top_value + 1, EdOp.Delete)
-            elif left_value < top_value and left_value < diagonal_value:
-                result[i][j] = (left_value + 1, EdOp.Insert)
-            else:
-                if are_values_same:
-                    result[i][j] = (diagonal_value, EdOp.Copy)
-                else:
-                    result[i][j] = (diagonal_value + 1, EdOp.Substitute)
-
-    result = [[(0, EdOp.Unprocessed)] * len(T) for _ in F]
-    find_edit(len(F) - 1, len(T) - 1)
-    return result
+    num_of_ways_to_height = [0] * (H + 1)
+    num_of_moves_to_top(H)
+    return num_of_ways_to_height[-1]
 
 
 if __name__ == "__main__":
-    res = minimum_edit_distance(" KITTEN", " KNITTING")
-    # res = minimum_edit_distance(" KI", " KNI")
-    print(res[-1][-1][0])
-    for row in res:
-        s = ""
-        for ele in row:
-            s += "(" + str(ele[0]) + "," + ele[1].name[0] + ") ||"
-        print(s)
+    res = num_of_moves_to_climb_stairs(4, 3)
+    print(res)
 
 # Comment
 # Comment
