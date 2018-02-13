@@ -87,7 +87,9 @@ def n_queen_placement_ext(n):
             prev_row_num = row_num - 1
             if prev_row_num >= 0:
                 prev_row_placement = col_placement[prev_row_num]
+
                 disallowed_values.extend([prev_row_placement - 1, prev_row_placement, prev_row_placement + 1])
+
             if col_num not in disallowed_values and col_num not in col_placement:
                 col_placement[row_num] = col_num
                 solve_n_queens(row_num + 1)
@@ -95,6 +97,80 @@ def n_queen_placement_ext(n):
     result, col_placement = [], [None] * n
     solve_n_queens(0)
     return result
+
+
+def n_queen_placement_back_track(n):
+    def print_allowed_map():
+        # print(" ********************* ")
+        # for row in allowed_map:
+        #     print(row)
+        # print(" ********************* ")
+        pass
+
+    def block_entire_row_col(item, pos):
+        for i in range(0, n):
+            allowed_map[item][i].add(item)
+            allowed_map[i][pos].add(item)
+
+    def block_diagonal_by_item(item, pos):
+        level = 0;
+        for i in range(item + 1, n):
+            level += 1
+            if (pos + level) < n:
+                allowed_map[i][pos + level].add(item)
+            if (pos - level) >= 0:
+                allowed_map[i][pos - level].add(item)
+
+    def release_entire_row_col(item, pos):
+        for i in range(0, n):
+            if item in allowed_map[item][i]:
+                allowed_map[item][i].remove(item)
+            if item in allowed_map[i][pos]:
+                allowed_map[i][pos].remove(item)
+
+    def release_diagonal_by_item(item, pos):
+        level = 0;
+        for i in range(item + 1, n):
+            level += 1
+            if (pos + level) < n and item in allowed_map[i][pos + level]:
+                allowed_map[i][pos + level].remove(item)
+            if (pos - level) >= 0 and item in allowed_map[i][pos - level]:
+                allowed_map[i][pos - level].remove(item)
+
+    def position_available(item, pos):
+        return True if len(allowed_map[item][pos]) == 0 else False
+
+    def move_next(level):
+        if level == (n):
+            print(position_map)
+            results.append(position_map)
+            # print(allowed_map)
+            return
+        for pos in range(0, n):
+            if position_available(level, pos):
+                position_map[pos] = level
+                block_entire_row_col(level, pos)
+                block_diagonal_by_item(level, pos)
+                # print(f" Before move {level} at {pos}")
+                print_allowed_map()
+                move_next(level + 1)
+                release_entire_row_col(level, pos)
+                release_diagonal_by_item(level, pos)
+                # print(f" !!! After move {level} at {pos} !!! ")
+                print_allowed_map()
+                position_map[pos] = -1
+
+    # allowed_map = [[set() for _ in range(0, n)] for _ in range(0, n)]
+    allowed_map = []
+    for i in range(0, n):
+        allowed_map.append([])
+        for j in range(0, n):
+            allowed_map[i].append(set())
+
+    position_map = [-1 for _ in range(0, n)]
+    results = []
+    move_next(0)
+    return results
 
 
 # 15.3 Generate permutations
@@ -213,6 +289,26 @@ def generate_power_subset_manjesh(A):
     return results
 
 
+def generate_power_subset_manjesh_recursion(input_set):
+    def generate_power_subset(to_be_selected_index, up_to_know_powerset):
+        if to_be_selected_index == len(input_set):
+            return
+
+        this_run_set = []
+        for existing_set in up_to_know_powerset:
+            new_set = existing_set.copy()
+            new_set.add(input_set[to_be_selected_index])
+            this_run_set.append(new_set)
+        up_to_know_powerset.append(set(input_set[to_be_selected_index]))
+        [up_to_know_powerset.append(s) for s in this_run_set]
+        generate_power_subset(to_be_selected_index + 1, up_to_know_powerset)
+
+    power_set = []
+    generate_power_subset(0, power_set)
+    power_set.append({})
+    return power_set
+
+
 # 15.5 Generate K subset
 def generate_k_subset(A, k):
     def build_k_subset(anchor, offset):
@@ -250,6 +346,18 @@ def generate_k_subset_new(A, k):
     results = []
     build_k_subset_move_anchor(0)
     return results
+
+
+# 15.6 Matching parantheses count
+def num_parantheses_count(N):
+    parentheses_dict = {1: 0, 2: 1}
+    for i in range(3, N + 1):
+        i_count = 0
+        for j in range(1, i // 2 + 1):
+            i_count += parentheses_dict[j] + parentheses_dict[i - j]
+            # i_count = max(i_count, parentheses_dict[j] + parentheses_dict[i - j])
+        parentheses_dict[i] = i_count
+    return parentheses_dict[N]
 
 
 # 15.7 Generate palindromic decompostions
@@ -294,7 +402,7 @@ def create_bt_tree_node(num_nodes):
 
 
 if __name__ == "__main__":
-    res = create_bt_tree_node(3)
+    res = num_parantheses_count(4)
     print(res)
 
 # Comments

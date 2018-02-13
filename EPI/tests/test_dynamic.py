@@ -39,6 +39,13 @@ def test_traverse_2d_array():
     # assert len(paths) == 48620
 
 
+# 16.4 derive combination
+# pytest -s EPI\tests\test_dynamic.py::test_compute_binomial_coefficents
+def test_compute_binomial_coefficents():
+    res = compute_binomial_coefficents(5, 2)
+    assert res == 10
+
+
 # 16.6 Knapsack problem
 # pytest -s EPI\tests\test_dynamic.py::test_knapsack_value
 def test_knapsack_value():
@@ -63,3 +70,10 @@ def test_pick_up_coins_fox_max():
 def test_num_of_moves_to_climb_stairs():
     res = num_of_moves_to_climb_stairs(4, 3)
     assert res == 9
+
+
+# 16.12 Longest non decreasing subset
+# pytest -s EPI\tests\test_dynamic.py::test_longest_non_decreasing_subset
+def test_longest_non_decreasing_subset():
+    res = longest_non_decreasing_subset([1, 5, 2, 6, 3, 4])
+    res == 4

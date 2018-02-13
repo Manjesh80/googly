@@ -317,9 +317,99 @@ def num_of_moves_to_climb_stairs(H, S):
     return num_of_ways_to_height[-1]
 
 
+# 16.12 Longest non decreasing subset
+def longest_non_decreasing_subset(A):
+    max_length = [1] * len(A)
+    for i in range(1, len(A)):
+        max_j_which_is_lesser_than_i = []
+        for j in range(i):
+            if A[i] > A[j]:
+                max_j_which_is_lesser_than_i.append(max_length[j])
+        max_length[i] = max(max(max_j_which_is_lesser_than_i) + 1, max_length[i])
+    return max(max_length)
+
+
+# 16.11 Minimum messiness TODO
+def minimum_mesiness(words, line_length):
+    num_remaining_blanks = line_length - len(words[0])
+    min_mesiness = ([num_remaining_blanks ** 2] + [float('inf')] * (len(words) - 1))
+    for i in range(1, len(words)):
+        num_remaining_blanks = line_length - len(words[i])
+        min_mesiness[i] = min_mesiness[i - 1] + num_remaining_blanks ** 2
+        for j in reversed(range(i)):
+            num_remaining_blanks -= len(words[j]) + 1
+            if num_remaining_blanks < 0:
+                break
+            first_j_mesiness = 0 if j - 1 < 0 else min
+            pass
+
+
+# 16.4 derive combination
+def compute_binomial_coefficents(N, K):
+    def derive_combination(x, y):
+        if y in (0, x):
+            return 1
+        if results[x][y] == 0:
+            with_y = derive_combination(x - 1, y)
+            without_y = derive_combination(x - 1, y - 1)
+            results[x][y] = with_y + without_y
+        return results[x][y]
+
+    results = [[0] * (K + 1) for _ in range(N + 1)]
+    derive_combination(N, K)
+    return results[-1][-1]
+
+
+def basic_recursion(x, y):
+    def set_values(i, j):
+        if i == 0 or j == 0:
+            result[i][j] = 1
+            return
+        set_values(i - 1, j)
+        set_values(i, j - 1)
+        if result[i][j] == -1:
+            result[i][j] = 9
+
+    result = [[-1] * x for _ in range(y)]
+    set_values(x - 1, y - 1)
+    return result
+
+
+# 16.7 Dictionary decomposition
+def dictionary_decomposition(lookup, word):
+    def decompose_word(i, j):
+        if result[i][j] != -1 or i < 0 or j < 0:
+            return
+        # if i == 0:
+        #     result[i][j] = 0
+        #     return
+        # if j == 0 and i != 0:
+        #     result[i][j] = 1
+        #     return
+        decompose_word(i - 1, j)
+        decompose_word(i, j - 1)
+        if result[i][j] == -1:
+            final_result = 0
+            for k in range(0, j + 1):
+                sub_subword = word[k:j + 1]
+                if sub_subword in lookup[:i + 1]:
+                    if result[i - 1][j - len(sub_subword)] != 0 or result[i][j - len(sub_subword)] != 0:
+                        final_result = 1
+                        break
+            result[i][j] = final_result
+
+    result = [([-1] * len(word)) for _ in range(len(lookup))]
+    # result[0][0] = 1
+    decompose_word(len(lookup) - 1, len(word) - 1)
+    return result
+
+
 if __name__ == "__main__":
-    res = num_of_moves_to_climb_stairs(4, 3)
-    print(res)
+    # res = dictionary_decomposition(['car', 'bar'], 'carbar')
+    res = dictionary_decomposition(['a', 'man', 'plan', 'canal'], 'amanaplanacanal')
+    # res = basic_recursion(3, 3)
+    for r in res:
+        print(r)
 
 # Comment
 # Comment

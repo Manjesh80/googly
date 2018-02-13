@@ -26,7 +26,7 @@ def test_permutations_epi():
 # 15.4 Generate the power set
 # pytest EPI\tests\test_recursion.py::test_generate_power_subset
 def test_generate_power_subset():
-    res = generate_power_subset([1, 2])
+    res = generate_power_subset_manjesh_recursion(['1', '2'])
     assert len(res) == 4
 
 
