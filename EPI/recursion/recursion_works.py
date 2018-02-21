@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 PEGS_NAME = {0: "FROM"}
 
 
@@ -360,6 +362,92 @@ def num_parantheses_count(N):
     return parentheses_dict[N]
 
 
+def generate_balanced_parantheses(num_pairs):
+    def directed_generate_balanced_parantheses(num_of_left_paren, num_of_right_paren, valid_prefix, result=[]):
+        print(
+            f" Calling method ==> Left ==> {num_of_left_paren} Right ==> {num_of_right_paren} Prefix is ==> {valid_prefix}")
+        if num_of_left_paren > 0:
+            directed_generate_balanced_parantheses(num_of_left_paren - 1, num_of_right_paren, valid_prefix + '[')
+        if num_of_left_paren < num_of_right_paren:
+            directed_generate_balanced_parantheses(num_of_left_paren, num_of_right_paren - 1, valid_prefix + ']')
+        if not num_of_right_paren:
+            result.append(valid_prefix)
+        return result
+
+    return directed_generate_balanced_parantheses(num_pairs, num_pairs, '')
+
+
+def generate_balanced_parantheses_epi(num_pairs):
+    def directed_generate_balanced_parantheses(num_of_left_paren, num_of_right_paren, valid_prefix, result=[]):
+        if num_of_left_paren > 0:
+            directed_generate_balanced_parantheses(num_of_left_paren - 1, num_of_right_paren, valid_prefix + '[')
+        if num_of_left_paren < num_of_right_paren:
+            directed_generate_balanced_parantheses(num_of_left_paren, num_of_right_paren - 1, valid_prefix + ']')
+        if not num_of_right_paren:
+            result.append(valid_prefix)
+        return result
+
+    return directed_generate_balanced_parantheses(num_pairs, num_pairs, '')
+
+
+def permutation_dup_not_supported(input):
+    dict = OrderedDict()
+    for k in input:
+        if k not in dict:
+            dict[k] = 0
+        dict[k] += 1
+
+    def create_permutation(level):
+        if level == len(input):
+            results.append(current_permutation.copy())
+            return
+
+        for i in range(0, len(input)):
+            to_add = input[i];
+            if dict[to_add] > 0:
+                dict[to_add] -= 1
+                current_permutation.append(to_add)
+                create_permutation(level + 1)
+                current_permutation.remove(to_add)
+                dict[to_add] += 1
+
+    results = []
+    current_permutation = []
+    create_permutation(0)
+    return results
+
+
+def permutation(input):
+    dict = OrderedDict()
+    for k in input:
+        if k not in dict:
+            dict[k] = 0
+        dict[k] += 1
+
+    def dict_value_at_pos(pos):
+        temp_list = list(dict.items())
+        return temp_list[pos]
+
+    def create_permutation(level):
+        if level == len(input):
+            results.append(current_permutation.copy())
+            return
+
+        for i in range(0, len(dict)):
+            to_add, count = dict_value_at_pos(i)
+            if count > 0:
+                dict[to_add] -= 1
+                current_permutation.append(to_add)
+                create_permutation(level + 1)
+                current_permutation.remove(to_add)
+                dict[to_add] += 1
+
+    results = []
+    current_permutation = []
+    create_permutation(0)
+    return results
+
+
 # 15.7 Generate palindromic decompostions
 def palindrome_partitioning(input):
     def directed_palindrome_partitioning(offset, partial_partition):
@@ -385,7 +473,6 @@ class BTNode:
 
 
 # 15.8 Generate binary trees
-
 def create_bt_tree_node(num_nodes):
     if num_nodes == 0:
         return [None]
@@ -401,9 +488,224 @@ def create_bt_tree_node(num_nodes):
     return result
 
 
+def get_bt_possibility_count(n):
+    node_len_count = {0: 1, 1: 1}
+    for i in range(2, n + 1):
+        cur_node_len_count = 0
+        for j in range(0, i):
+            cur_node_len_count += node_len_count[j] * node_len_count[i - j - 1]
+        node_len_count[i] = cur_node_len_count
+    return node_len_count[n]
+
+
+# 15.10 Compute Gray Code
+def grey_code(bits):
+    n = 2 ** bits
+
+    def directed_gray_code(level):
+        if level == n:
+            if abs(bin(current_sequence[0]).count("1") - bin(current_sequence[-1]).count("1")) == 1:
+                results.append(current_sequence.copy())
+            return
+
+        for i in range(0, n):
+            if i not in current_sequence:
+                if level > 0:
+                    if abs(bin(i).count("1") - bin(current_sequence[level - 1]).count("1")) == 1:
+                        current_sequence[level] = i
+                    else:
+                        continue
+                else:
+                    current_sequence[level] = i
+                directed_gray_code(level + 1)
+                current_sequence[level] = -1
+
+    current_sequence = [-1 for _ in range(n)]
+    results = []
+    directed_gray_code(0)
+    return results
+
+
+# 15.11 Generate Palindromic sequences
+# res = gen_palindromic_sequences_tushar(list('14141'))
+def gen_palindromic_sequences_tushar(values):
+    def directed_palindromic_sequences(level):
+        if level == len(values):
+            result.append(current_result.copy())
+            return
+        for i in range(level, len(values) + 1):
+            current_str = ''.join(values[level: i + 1])
+            if current_str == current_str[::-1]:  # Palindrome so continue
+                current_result.append(current_str)
+                directed_palindromic_sequences(i + 1)
+                current_result.pop()
+
+    result = []
+    current_result = []
+    directed_palindromic_sequences(0)
+    return result
+
+
+# 15.12 Generate matched parantheses
+# res = generate_match_parantheses(4)
+def generate_match_parantheses(total_pair):
+    def generated_directed_parantheses(left_remaining, right_remaining, prefix):
+        if not left_remaining and not right_remaining:
+            result.append("".join(prefix.copy()))
+            return
+        if left_remaining > 0:
+            prefix.append('[')
+            generated_directed_parantheses(left_remaining - 1, right_remaining, prefix)
+            prefix.pop()
+
+        if right_remaining > left_remaining:
+            prefix.append(']')
+            generated_directed_parantheses(left_remaining, right_remaining - 1, prefix)
+            prefix.pop()
+
+    result = []
+    generated_directed_parantheses(total_pair, total_pair, [])
+    return result
+
+
+# 15.13 Generate K - Subset
+def generate_k_subset(values, combinations):
+    def directed_k_subset(anchor, current_level, prefix):
+        if current_level == combinations:
+            result.append(prefix.copy())
+            return
+
+        prefix.append(values[anchor])
+        for i in range(anchor + 1, len(values)):
+            prefix.append(values[i])
+            directed_k_subset(i, current_level + 1, prefix)
+            prefix.pop()
+        prefix.pop()
+
+    result = []
+    directed_k_subset(0, 0, [])
+    return result
+
+
+# 15.13 Generate K - Subset
+def generate_k_subset_new(values, combinations):
+    def directed_k_subset(anchor, current_level, prefix):
+        if current_level == combinations:
+            result.append(prefix.copy())
+            return
+
+        if anchor < combinations + 1:
+            prefix.append(values[anchor])
+            for i in range(anchor + 1, len(values)):
+                directed_k_subset(i, current_level + 1, prefix)
+            prefix.pop()
+
+    result = []
+    directed_k_subset(0, 0, [])
+    return result
+
+
+def generate_k_subset_rec(values, combinations):
+    def directed_k_subset(anchor, level, prefix):
+        if len(prefix) == combinations:
+            result.append(prefix.copy())
+            return
+        for i in range(level, combinations + 1):
+            prefix.append(values[i])
+            for j in range(i + 1, len(values)):
+                prefix.append(values[j])
+                directed_k_subset(j, i + 1, prefix)
+                prefix.pop()
+            prefix.pop()
+
+    result = []
+    directed_k_subset(0, 0, [])
+    return result
+
+
+def generate_k_subset_rec_new(values, combinations):
+    def directed_k_subset(level, prefix):
+        if len(prefix) == combinations:
+            result.append(prefix.copy())
+            return
+
+        for i in range(level, combinations + 1):
+            prefix.append(values[i])
+            for j in range(i + 1, len(values)):
+                prefix.append(values[j])
+                directed_k_subset(i + 1, prefix)
+                prefix.pop()
+            prefix.pop()
+
+    result = []
+    directed_k_subset(0, [])
+    return result
+
+
+def generate_k_subset_rec_new(values, combinations):
+    def directed_subset(level, anchor, prefix):
+        if len(prefix) == combinations:
+            result.append(prefix.copy())
+            return
+
+        for i in range(anchor + 1, len(values)):
+            prefix.append(values[i])
+            directed_subset(level + 1, i, prefix)
+            prefix.pop()
+
+    result = []
+    directed_subset(0, -1, [])
+    return result
+
+
+def generate_k_subset_rec_new_2(values, combinations):
+    def directed_subset(anchor, prefix):
+        if len(prefix) == combinations:
+            result.append(prefix.copy())
+            return
+
+        for i in range(anchor + 1, len(values)):
+            prefix.append(values[i])
+            directed_subset(i, prefix)
+            prefix.pop()
+
+    result = []
+    directed_subset(-1, [])
+    return result
+
+
+def combinations(n, k):
+    def directed_combinations(offset, partial_combination):
+        if len(partial_combination) == k:
+            result.append(list(partial_combination))
+            return
+
+        num_remaining = k - len(partial_combination)
+        i = offset
+        while i <= n and num_remaining <= n - i + 1:
+            directed_combinations(i + 1, partial_combination + [i])
+            i += 1
+
+    result = []
+    directed_combinations(1, [])
+    return result
+
+
+def kadens_max_sub_array(A):
+    if not A:
+        return -1
+    current_max = global_max = A[0]
+    for i in range(1, len(A) - 1):
+        current_max = max(A[i], current_max + A[i])
+        global_max = max(global_max, current_max)
+    return global_max
+
+
 if __name__ == "__main__":
-    res = num_parantheses_count(4)
+    res = kadens_max_sub_array([-2, 3, 2, -1])
     print(res)
+    # for r in res:
+    #     print(r)
 
 # Comments
 # Comments
