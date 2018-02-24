@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from collections import namedtuple
 
 PEGS_NAME = {0: "FROM"}
 
@@ -289,6 +290,16 @@ def generate_power_subset_manjesh(A):
     results = []
     generate_power_subset_anchor(0)
     return results
+
+def generate_power_subset_manjesh_new(A):
+    def generate_power_subset(remaining, prefix):
+        for i in range(0, len(remaining)):
+            power_set.append(list(prefix + [remaining[i]]))
+            generate_power_subset(remaining[i + 1:], prefix + [remaining[i]])
+
+    power_set = []
+    generate_power_subset(A, [])
+    return power_set
 
 
 def generate_power_subset_manjesh_recursion(input_set):
@@ -701,11 +712,81 @@ def kadens_max_sub_array(A):
     return global_max
 
 
+class Edge(object):
+    def __init__(self, name, weight, start, end):
+        self.name = name
+        self.weight = weight
+        self.start = start
+        self.end = end
+
+
+class SimpleNode:
+    def __init__(self, name):
+        self.name = name
+        self.edges = []
+
+    def add_edges(self, edges):
+        self.edges = edges
+
+
+def build_simple_diameter_tree():
+    nodeA = SimpleNode('A')
+    nodeB = SimpleNode('B')
+    nodeC = SimpleNode('C')
+    nodeD = SimpleNode('D')
+
+    nodeE = SimpleNode('E')
+    nodeF = SimpleNode('F')
+    nodeG = SimpleNode('G')
+
+    edge_A_B = Edge('AB', 10, nodeA, nodeB)
+    edge_A_C = Edge('AC', 1, nodeA, nodeC)
+    edge_A_D = Edge('AD', 1, nodeA, nodeD)
+
+    edge_C_E = Edge('CE', 3, nodeC, nodeE)
+    edge_C_F = Edge('CF', 1, nodeC, nodeF)
+    edge_C_G = Edge('CG', 3, nodeC, nodeG)
+
+    nodeA.add_edges([edge_A_B, edge_A_C, edge_A_D])
+    nodeC.add_edges([edge_C_E, edge_C_F, edge_C_G])
+    return nodeA
+
+
+# 15.11 Calculate tree diameter
+def tree_diameter(root):
+    HD = namedtuple('HD', ('name', 'height', 'diameter'))
+
+    def calculate_tree_diameter(node):
+        if not node.edges or len(node.edges) == 0:
+            return HD(name=node.name, height=0, diameter=0)
+        edges_h_d = []
+        child_originals = []
+        for edge in node.edges:
+            h_d = calculate_tree_diameter(edge.end)
+            child_originals.append(h_d)
+            edges_h_d.append(HD(name=edge.name, height=h_d.height + edge.weight, diameter=h_d.diameter + edge.weight))
+
+        max_height = max(edges_h_d, key=lambda mh: mh.height)[1]
+        edges_h_d.sort(key=lambda mh: mh.height, reverse=True)
+        total_diameter_this_node = sum([hd.height for hd in edges_h_d[:2]])
+        total_diameter_child = max(child_originals, key=lambda mh: mh.diameter)[2]
+        global_max_diameter[0] = max(global_max_diameter[0], total_diameter_this_node, total_diameter_child)
+        res = HD(name=node.name, height=max_height, diameter=total_diameter_this_node)
+        print(res)
+        return res
+
+    global_max_diameter = [0]
+    return global_max_diameter, calculate_tree_diameter(root)
+
+
+
+
+
 if __name__ == "__main__":
-    res = kadens_max_sub_array([-2, 3, 2, -1])
+    res = generate_power_subset(['A', 'B', 'C'])
+    # root = build_simple_diameter_tree()
+    # res = tree_diameter(root)
     print(res)
-    # for r in res:
-    #     print(r)
 
 # Comments
 # Comments

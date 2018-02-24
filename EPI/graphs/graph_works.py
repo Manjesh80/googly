@@ -1,6 +1,7 @@
 from enum import Enum
 from heapq import *
 import sys
+from collections import namedtuple
 
 
 class Vertex(object):
@@ -22,6 +23,7 @@ class Vertex(object):
         self.visit_time = None
         self.low_time = None
         self.children = 0
+        self.is_root = False
 
     def __cmp__(self, other):
         return self.cmp(self.min_distance, other.min_distance)
@@ -60,10 +62,11 @@ class Node(object):
 
 
 class Edge(object):
-    def __init__(self, weight, start, end):
+    def __init__(self, weight, start, end, name=''):
         self.weight = weight
         self.start = start
         self.end = end
+        self.name = name
 
 
 def dfs(root):
@@ -675,20 +678,16 @@ def build_tarjan_graph():
     return node_A
 
 
-# def build_tarjan_graph():
-#     node_A = Vertex(name='A')
-#     node_B = Vertex(name='B')
-#     node_C = Vertex(name='C')
-#
-#     node_A.add_neighbour(node_B)
-#     node_B.add_neighbour(node_A)
-#
-#     node_A.add_neighbour(node_C)
-#     node_C.add_neighbour(node_A)
-#
-#     node_B.add_neighbour(node_C)
-#     node_C.add_neighbour(node_B)
-#     return node_A
+def build_tarjan_graph_simple():
+    node_A = Vertex(name='A')
+    node_B = Vertex(name='B')
+    node_C = Vertex(name='C')
+
+    node_A.add_neighbours([node_B])
+    node_B.add_neighbours([node_C, node_A])
+    node_C.add_neighbours([node_B])
+
+    return node_A
 
 
 # 18.58 Tarjan articulation point, to find single point of failure
@@ -739,7 +738,156 @@ def tarjans_articulation_point(root):
     return articualtion_points
 
 
+# 18.58 Tarjan articulation point, to find single point of failure
+# find the visited time and low-visit-time, and apply 2 rules
+# if you are root and have 2 child or
+# if have visit time lesser that low time of adjacent vertex
+# When you find back path update the current vertex low time to min of adjacent and update parents low time as well
+def tarjans_articulation_point_new(root: Vertex):
+    root.is_root = True
+    visited_set = set()
+    articulate_points = []
+    current_time = [0]
+
+    def traverse_tarjan(node: Vertex):
+        if not node:
+            return
+
+        visited_set.add(node.name)
+        node.visit_time = node.low_time = current_time[0]
+        current_time[0] += 1
+
+        for child in node.neighbours:
+            if node.parent is not None and child.name == node.parent.name:
+                continue
+
+            if child.name not in visited_set:
+                node.children += 1
+                child.parent = node
+                traverse_tarjan(child)
+            else:
+                node.low_time = child.low_time = min(node.low_time, child.low_time)
+
+        if (node.is_root and node.children > 1) or (node.visit_time <= min([n.low_time for n in node.neighbours])):
+            # if node.is_root and node.children > 1:
+            articulate_points.append(node.name)
+
+    traverse_tarjan(root)
+    return articulate_points
+
+
+def build_edmond_karp_graph():
+    node_A = Vertex(name='A')
+    node_B = Vertex(name='B')
+    node_C = Vertex(name='C')
+    node_D = Vertex(name='D')
+
+    edge_A_B = Edge(3, node_A, node_B, ' A --> B ')
+    edge_A_C = Edge(2, node_A, node_C, ' A --> C ')
+
+    edge_B_C = Edge(2, node_B, node_C, ' B --> C ')
+    edge_B_D = Edge(1, node_B, node_D, ' B --> D ')
+
+    edge_C_D = Edge(4, node_C, node_D, ' C --> D ')
+
+    node_A.edges = [edge_A_B, edge_A_C]
+    node_B.edges = [edge_B_D, edge_B_C]
+    node_C.edges = [edge_C_D]
+    return node_A, node_D
+
+
+# 18.59 max flow algorithm
+def edmond_karp_max_flow(root: Vertex, sink: Vertex):
+    PathInfo = namedtuple('PathInfo', ("added_by_item", "added_via_edge"))
+    max_flow = 0
+    while True:
+        visited_so_far = set()
+        processing_queue = []
+        path_guide = {}
+        processing_queue.append(root)
+        sink_reached = False
+        path_guide[root.name] = None
+        while processing_queue:
+            current_item = processing_queue.pop(0)
+            if current_item.name == sink.name:
+                sink_reached = True
+                break
+
+            if current_item.name in visited_so_far:
+                continue
+            visited_so_far.add(current_item.name)
+            for edge in current_item.edges:
+                if edge.weight > 0:
+                    path_guide[edge.end.name] = PathInfo(current_item, edge)
+                    processing_queue.append(edge.end)
+
+        current_path = []
+        if sink_reached:
+            pointer_element = sink.name
+            while True:
+                was_put_by = path_guide[pointer_element]
+                if was_put_by:
+                    current_path.append(was_put_by)
+                    pointer_element = was_put_by.added_by_item.name
+                else:
+                    break
+        else:
+            print(" !!!!!!!!! Could not reach sink so returning !!!!!!!! ")
+            break
+
+        min_weight_augmented_path = min([ele.added_via_edge.weight for ele in current_path])
+        max_flow += min_weight_augmented_path
+        print('********************************* ')
+        print(f" This path is of weight ==> {min_weight_augmented_path}")
+        for path in current_path[::-1]:
+            print(path.added_via_edge.name)
+            path.added_via_edge.weight -= min_weight_augmented_path
+        print('********************************* ')
+
+    return max_flow
+
+
 if __name__ == "__main__":
-    root = build_tarjan_graph()
-    res = tarjans_articulation_point(root)
+    start, end = build_edmond_karp_graph()
+    res = edmond_karp_max_flow(start, end)
     print(res)
+    # root = build_tarjan_graph_simple()
+    # res = tarjans_articulation_point_new(root)
+    # print(res)
+
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment
+# Comment

@@ -198,6 +198,20 @@ def permute_array_with_o1_space(A, perm):
     return A
 
 
+def permute_array_ganesh(A, perm):
+    current_index = 0
+    while current_index < len(perm) - 1:
+        if perm[current_index] == current_index:
+            current_index += 1
+            continue
+        item_getting_moved = A[perm[current_index]]
+        A[current_index], A[perm[current_index]] = item_getting_moved, A[current_index]
+        b = perm[current_index]
+        perm[current_index], perm[b] = perm[b], perm[current_index]
+
+    return A, perm
+
+
 # 5.11 - Compute the next permutation
 def compute_next_permutation(A):
     inverse_point = len(A) - 2
@@ -301,8 +315,10 @@ def matrix_in_spiral_order(square_matrix):
 
 
 if __name__ == "__main__":
-    for i in range(100, 105):
-        print(i, '--> ', ~i)
-    print('*****')
-    for i in range(5):
-        print(i, '--> ', ~i)
+    res = permute_array_with_o1_space(['a', 'b', 'c', 'd'], [2, 0, 1, 3])
+    print(res)
+    # for i in range(100, 105):
+    #     print(i, '--> ', ~i)
+    # print('*****')
+    # for i in range(5):
+    #     print(i, '--> ', ~i)
