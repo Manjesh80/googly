@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from collections import namedtuple
+from collections import Counter
 
 PEGS_NAME = {0: "FROM"}
 
@@ -291,6 +292,7 @@ def generate_power_subset_manjesh(A):
     generate_power_subset_anchor(0)
     return results
 
+
 def generate_power_subset_manjesh_new(A):
     def generate_power_subset(remaining, prefix):
         for i in range(0, len(remaining)):
@@ -457,6 +459,28 @@ def permutation(input):
     current_permutation = []
     create_permutation(0)
     return results
+
+
+def generate_permutation(values):
+    root_counter = Counter(values)
+
+    def gen_cyclic_permutation(curr_counter):
+        if len(current_perm) == len(values):
+            result.append(current_perm.copy())
+            return
+        for key in curr_counter.keys():
+            if curr_counter[key] == 0:
+                continue
+            current_perm.append(key)
+            curr_counter[key] -= 1
+            gen_cyclic_permutation(curr_counter)
+            curr_counter[key] += 1
+            current_perm.pop()
+
+    result = []
+    current_perm = []
+    gen_cyclic_permutation(root_counter)
+    return result
 
 
 # 15.7 Generate palindromic decompostions
@@ -779,14 +803,14 @@ def tree_diameter(root):
     return global_max_diameter, calculate_tree_diameter(root)
 
 
-
-
-
 if __name__ == "__main__":
-    res = generate_power_subset(['A', 'B', 'C'])
+    # res = generate_power_subset(['A', 'B', 'C'])
     # root = build_simple_diameter_tree()
     # res = tree_diameter(root)
+    res = generate_permutation(['A', 'A', 'B', 'C'])
+    # res = permutation(['A', 'A', 'B', 'B'])
     print(res)
+    print(len(res))
 
 # Comments
 # Comments

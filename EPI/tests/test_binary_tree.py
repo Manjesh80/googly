@@ -17,6 +17,18 @@ def test_is_tree_symmetric():
     assert True == is_tree_symmetric(root)
 
 
+# 9.3 LCA
+# pytest -s EPI\tests\test_binary_tree.py::test_find_lca
+def test_find_lca():
+    nodes = build_perfect_tree()
+    res = compute_lca(nodes['a'], nodes['c'], nodes['h'])
+    assert res.name == 'b'
+    res = compute_lca(nodes['a'], nodes['j'], nodes['f'])
+    assert res.name == 'a'
+    res = compute_lca(nodes['a'], nodes['k'], nodes['l'])
+    assert res.name == 'j'
+
+
 # 9.4 Compute the LCA with Parent( lowest common ancestor ) in Binary Tree
 # pytest EPI\tests\test_binary_tree.py::test_lca_with_parent
 def test_lca_with_parent():
@@ -32,6 +44,16 @@ def test_match_sum():
     parent = sum_the_root_to_leaf_path(tree['a'])
     parent = match_sum(tree['a'], 591)
     assert len(parent) == 2
+
+
+# 9.9 Find K-th element in In-Order traversal
+# pytest -s EPI\tests\test_binary_tree.py::test_compute_kth_node_in_order_traversal_new
+def test_compute_kth_node_in_order_traversal_new():
+    nodes = build_tree_dict()
+    res = compute_kth_node_in_order_traversal_new(nodes['a'], 6)
+    assert res.name == 'h'
+    res = compute_kth_node_in_order_traversal_new(nodes['a'], 3)
+    assert res.name == 'e'
 
 
 # 9.7 Implement an inorder traversal without recursion
@@ -82,6 +104,26 @@ def test_find_successor_epi():
     assert find_successor_epi(nodes['o']).name == 'p'
 
 
+# pytest -s EPI\tests\test_binary_tree.py::test_find_successor_new
+def test_find_successor_new():
+    nodes = build_tree_dict()
+    assert find_successor_new(nodes['a'], nodes['d']).name == 'c'
+    assert find_successor_new(nodes['a'], nodes['c']).name == 'e'
+    assert find_successor_new(nodes['a'], nodes['e']).name == 'b'
+    assert find_successor_new(nodes['a'], nodes['b']).name == 'f'
+    assert find_successor_new(nodes['a'], nodes['f']).name == 'h'
+    assert find_successor_new(nodes['a'], nodes['h']).name == 'g'
+    assert find_successor_new(nodes['a'], nodes['g']).name == 'a'
+    assert find_successor_new(nodes['a'], nodes['a']).name == 'j'
+    assert find_successor_new(nodes['a'], nodes['j']).name == 'l'
+    assert find_successor_new(nodes['a'], nodes['l']).name == 'm'
+    assert find_successor_new(nodes['a'], nodes['m']).name == 'k'
+    assert find_successor_new(nodes['a'], nodes['k']).name == 'n'
+    assert find_successor_new(nodes['a'], nodes['n']).name == 'i'
+    assert find_successor_new(nodes['a'], nodes['i']).name == 'o'
+    assert find_successor_new(nodes['a'], nodes['o']).name == 'p'
+
+
 # 9.13 Reconstruct a binary tree with markers
 # pytest -s EPI\tests\test_binary_tree.py::test_build_pre_order_tree
 def test_build_pre_order_tree():
@@ -92,6 +134,15 @@ def test_build_pre_order_tree():
     assert node.data == 'H'
     assert node.left.data == 'B'
     assert node.right.data == 'C'
+
+
+# 9.14 Build linked list from edges
+# pytest -s EPI\tests\test_binary_tree.py::test_build_linked_list_from_edges
+def test_build_linked_list_from_edges():
+    nodes = build_tree_dict()
+    print_in_order_traversal(nodes['a'])
+    res = build_linked_list_from_edges(nodes['a'])
+    assert res == ['d', 'e', 'h', 'm', 'n', 'p']
 
 
 # 9.15 build leaves and edges

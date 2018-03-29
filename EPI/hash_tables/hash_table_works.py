@@ -218,6 +218,22 @@ def find_smallest_subarray_covering_subset_with_odict(stream, query_strings):
     return res
 
 
+# Example ['d', 'e', 'e', 'f', 'd', 'e', 'f'] ==> ['d', 'e', 'f'] ==> idx 2 to 4
+def find_smallest_subarray_covering_subset_new(paragraph, keywords):
+    best_min_index, best_max_index = 0, float('inf')
+    word_dict = OrderedDict()
+    for idx, word in enumerate(paragraph):
+        if word in keywords:
+            if word in word_dict:
+                del word_dict[word]
+            word_dict[word] = idx
+        if len(word_dict) == len(keywords):
+            idx_values = list(word_dict.values())
+            if idx_values[-1] - idx_values[0] < best_max_index - best_min_index:
+                best_min_index, best_max_index = idx_values[0], idx_values[-1]
+    return best_max_index - best_min_index, best_min_index, best_max_index
+
+
 # 12.8 Find the smallest Sub Array sequentially covering all values
 def find_smallest_subarray_sequentially_covering_subset_with_odict(stream, query_strings):
     loc = OrderedDict()
@@ -243,6 +259,24 @@ def find_smallest_subarray_sequentially_covering_subset_with_odict(stream, query
     return res
 
 
+def find_smallest_subarray_sequentially_covering_subset_new(paragraph, keywords):
+    result = [float('inf') for _ in keywords]
+    key_words_with_index = {k: i for i, k in enumerate(keywords)}
+    best_min_index, best_max_index = 0, float('inf')
+
+    for idx, word in enumerate(paragraph):
+        if word in keywords:
+            current_key_word_idx = key_words_with_index[word]
+            if current_key_word_idx > 0 and idx > result[current_key_word_idx - 1]:
+                result[current_key_word_idx] = idx
+                if current_key_word_idx == len(keywords) - 1:  # set the last value so you can compute
+                    if result[-1] - result[0] < best_max_index - best_min_index:
+                        best_min_index, best_max_index = result[0], result[-1]
+            else:
+                result[0] = idx
+    return best_max_index - best_min_index, best_min_index, best_max_index
+
+
 # 12.9 Find longest sub-array with distinct entries
 # ['f', 's', 'f', 'e', 't', 'w', 'e', 'n', 'w', 'e']
 def find_the_longest_sub_array_with_distinct_entries(words):
@@ -256,10 +290,8 @@ def find_the_longest_sub_array_with_distinct_entries(words):
             curr_result_start = trim_left_until(w, dist_dict)
         else:
             dist_dict[w] = idx
-
     curr_result = (curr_result_start, len(words) - 1)
     result = result if result_greater(result, curr_result) else curr_result
-
     return result
 
 
@@ -348,11 +380,43 @@ def compute_all_decomposition(sentence, words):
             return sentence[i: i + (len(words) * len(words[0]))]
 
 
+# 12.13 Collatz Conjecture
+def list_collatz_conjecture(N):
+    result = [set(), set()]
+
+    def compute_collatz(I):
+        local = set()
+        current_num = I
+        while current_num != 1:
+            local.add(current_num)
+            if current_num in result[0]:
+                result[0] = result[0].union(local)
+                local=None
+                break
+            if current_num in result[1]:
+                result[1] = result[1].union(local)
+                local = None
+                break
+            if current_num % 2 == 1:
+                current_num = current_num * 3 + 1
+            else:
+                current_num /= 2
+        if local:
+            result[0] = result[0].union(local)
+
+    for i in range(3, N):
+        print(f" Computing collatz for ==> {i}")
+        compute_collatz(i)
+    return sorted(result[0]), sorted(result[1])
+
+
 if __name__ == "__main__":
-    sentence = 'amanaplanacanapl'
-    sentence = 'xxxcanaplanaaplzzz'
-    words = ['can', 'apl', 'ana', 'apl']
-    # sentence = 'can'
-    # words = ['can']
-    res = compute_all_decomposition(sentence, words)
+    res = list_collatz_conjecture(100)
     print(res)
+    # sentence = 'amanaplanacanapl'
+    # sentence = 'xxxcanaplanaaplzzz'
+    # words = ['can', 'apl', 'ana', 'apl']
+    # # sentence = 'can'
+    # # words = ['can']
+    # res = compute_all_decomposition(sentence, words)
+    # print(res)

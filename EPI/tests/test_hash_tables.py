@@ -94,10 +94,11 @@ def test_find_smallest_subarray_covering_subset_with_odict():
 # pytest -s EPI\tests\test_hash_tables.py::test_find_smallest_subarray_sequentially_covering_subset_with_odict
 def test_find_smallest_subarray_sequentially_covering_subset_with_odict():
     stream = [s for s in 'abcefefadeefdefaac']
-    stream = [s for s in 'deefdef']
+    stream = [s for s in 'deeasdfdabfdeedf']
     query_strings = ['d', 'e', 'f']
     res = find_smallest_subarray_sequentially_covering_subset_with_odict(stream, query_strings)
-    assert res[0] == 4
+    print(res)
+    assert res[0] == 0
     assert res[1] == 6
 
 

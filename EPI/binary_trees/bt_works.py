@@ -143,6 +143,22 @@ def build_perfect_tree():
     return nodes
 
 
+def build_perfect_tree_new():
+    nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=c.split(',')[0]) for c in
+             "a#b#c#d#e#f#g#h#i".split('#')}
+
+    nodes['a'].left = nodes['b']
+    nodes['a'].right = nodes['d']
+    nodes['b'].left = nodes['c']
+    nodes['d'].left = nodes['e']
+    nodes['d'].right = nodes['g']
+    nodes['e'].left = nodes['f']
+    nodes['g'].left = nodes['h']
+    nodes['g'].right = nodes['i']
+
+    return nodes
+
+
 def build_tree_dict():
     nodes = {c.split(',')[0]: BTNode(name=c.split(',')[0], data=int(c.split(',')[1])) for c in
              "a,1#b,0#c,0#d,0#e,1#f,1#g,1#h,0#i,1#j,0#k,0#l,0#m,1#n,0#o,0#p,0".split('#')}
@@ -220,10 +236,12 @@ def build_tree():
     build_tree_dict()['a']
 
 
-def print_in_order_traversal(root):
-    print_in_order(root.left)
-    print(f" == {root.data} ")
-    print_in_order(root.right)
+def print_in_order_traversal(root: BTNode):
+    if not root:
+        return
+    print_in_order_traversal(root.left)
+    print(f" == {root.name} ")
+    print_in_order_traversal(root.right)
 
 
 def print_in_order_traversal_with_rlink(root):
@@ -284,6 +302,28 @@ def calculate_tree_depth(root):
         root.depth = cur_depth + 1
         return root.depth
     return -1
+
+
+def is_height_balanced(root):
+    BH = namedtuple('BH', ('is_balanced', 'height'))
+
+    def calculate_hd(node):
+        if not node:
+            return BH(is_balanced=True, height=-1)
+
+        left_bh = calculate_hd(node.left)
+        if not left_bh.is_balanced:
+            return BH(is_balanced=False, height=0)
+
+        right_bh = calculate_hd(node.right)
+        if not right_bh.is_balanced:
+            return BH(is_balanced=False, height=0)
+
+        balanced = abs(left_bh.height - right_bh.height) <= 1
+        height = max(left_bh.height, right_bh.height) + 1
+        return BH(is_balanced=balanced, height=height)
+
+    return calculate_hd(root)
 
 
 # 9.1 Test if a binary tree is height balanced
@@ -348,6 +388,29 @@ def lca(tree, node0, node1):
     return lca_helper(tree, node0, node1).ancestor
 
 
+def compute_lca(root, node1, node2):
+    def do_post_order(node):
+        if not node:
+            return 0
+        left_added = do_post_order(node.left)
+        right_added = do_post_order(node.right)
+        # if len(found_so_far) == 2 and parent[0] is None and (left_added + right_added) == 2:
+        if (left_added + right_added) == 2:
+            parent[0] = node
+            return 0
+        if node.name in [node1.name, node2.name]:
+            found_so_far.append(node.name)
+            return 1
+        else:
+            return left_added + right_added
+
+    parent = [None]
+    found_so_far = []
+    do_post_order(root)
+    print(f"Parent is ==> {parent[0].name}")
+    return parent[0]
+
+
 # 9.4 Compute the LCA with Parent( lowest common ancestor ) in Binary Tree
 def lca_with_parent(node0, node1):
     def get_node_depth(node):
@@ -407,6 +470,26 @@ def sum_the_root_to_leaf_path(root):
 
     res = get_child_nodes(root)
     return res
+
+
+def sum_the_root_to_leaf_path_new(root):
+    LevelWithSum = namedtuple('LevelWithSum', ('left_level', 'left_sum', 'right_level', 'right_sum'))
+
+    def traverse(node):
+        if not node:
+            return LevelWithSum(-1, 0, -1, 0)
+        left_value = traverse(node.left)
+        right_value = traverse(node.right)
+        value = LevelWithSum(-1, 0, -1, 0)
+        if left_value:
+            value.left_level = left_value.left_level + 1
+            value.left_sum = (node.data * (2 ** value.left_level)) + left_value.left_sum
+        if right_value:
+            value.right_level = right_value.right_level + 1
+            value.right_sum = (node.data * (2 ** value.right_level)) + right_value.right_sum
+        return value
+
+    return traverse(root)
 
 
 # 9.6 Match sum for the path
@@ -528,6 +611,24 @@ def compute_kth_node_in_order_travresal(root, k):
     return res
 
 
+def compute_kth_node_in_order_traversal_new(root, k):
+    def in_order(node):
+        if not node or current_number[0] > k:
+            return
+        in_order(node.left)
+        print(f"Processing node ==> {node.name}")
+        current_number[0] += 1
+        if current_number[0] == k:
+            print(f"k the element found ==> {node.name}")
+            k_th_element[0] = node
+        in_order(node.right)
+
+    current_number = [0]
+    k_th_element = [None]
+    in_order(root)
+    return k_th_element[0]
+
+
 def find_succ(root, match):
     def find_match(a, b):
 
@@ -570,6 +671,23 @@ def find_successor(root, match):
     return successor[0]
 
 
+def find_successor_new(root, predecessor):
+    def in_order(node):
+        if not node or successor[0] is not None:
+            return
+        in_order(node.left)
+        if predecessor_found[0] and successor[0] is None:
+            successor[0] = node
+        if predecessor.name == node.name:
+            predecessor_found[0] = True
+        in_order(node.right)
+
+    predecessor_found = [False]
+    successor = [None]
+    in_order(root)
+    return successor[0]
+
+
 def find_successor_epi(node):
     if node.right:
         node = node.right
@@ -606,6 +724,26 @@ def traverse_in_order(tree: BTNode):
     return result
 
 
+def traverse_in_order_new(root: BTNode):
+    curr = root
+    added_by_left_child = False
+    while curr:
+        if not added_by_left_child:
+            if curr.left:
+                curr = curr.left
+                continue
+            else:
+                print(f"Processing left leave element ==> {curr.name}")
+                curr = curr.parent
+                added_by_left_child = True
+
+        print(f"Processing parent element ==> {curr.name}")
+
+        if curr.right:
+            curr = curr.right
+            continue
+
+
 # 9.12 Reconstruct a binary tree from traversal data
 # inorder  ==> {  F, B, A , E, H , C , D , I , G }
 # preorder ==> { H , B, F, E , A , C , D , G, I }
@@ -622,6 +760,17 @@ def build_binary_tree(preorder, inorder):
                       )
 
     return build_binary_tree_helper(0, len(preorder) - 1, 0, len(inorder) - 1)
+
+
+def build_binary_tree_new(preorder, inorder):
+    def build_tree(po, io):
+        if not po and not io:
+            return None
+        return BTNode(name=po[0], data=po[0],
+                      left=build_tree(po=po[1:io.index(po[0]) + 1], io=io[0:io.index(po[0])]),
+                      right=build_tree(po=po[io.index(po[0]) + 1:], io=io[io.index(po[0]) + 1:]))
+
+    return build_tree(preorder, inorder)
 
 
 def build_binary_tree_epi(preorder, inorder):
@@ -652,6 +801,31 @@ def build_pre_order_tree(q: Queue):
                             left=build_pre_order_tree(q),
                             right=build_pre_order_tree(q))
             return parent
+
+
+def build_pre_order_tree_new(values):
+    def pre_order(values):
+        if values:
+            curr = values.pop(0)
+            if curr:
+                return BTNode(name=curr, data=curr,
+                              left=pre_order(values),
+                              right=pre_order(values))
+
+
+# 9.14 Build linked list from edges
+def build_linked_list_from_edges(root):
+    def in_order(node: BTNode):
+        if not node:
+            return
+        in_order(node.left)
+        if node.is_leaf():
+            result.append(node.name)
+        in_order(node.right)
+
+    result = []
+    in_order(root)
+    return result
 
 
 # 9.15 build leaves and edges
@@ -723,6 +897,32 @@ def build_rlink(root):
             return root
 
     return build_rlink_inorder(root)
+
+
+# 9.16 Fill RLink
+def build_rlink_new(root):
+    def in_order(node):
+        if not node:
+            return
+        if node.left and node.right:
+            print(f" Marry in-order nodes ==> {node.left.name} ==> {node.right.name}")
+        in_order(node.left)
+        in_order(node.right)
+
+    def marry_right_wall_to_left_wall(leftie, rightie):
+        if not leftie or not rightie:
+            return
+        left_wall = leftie.right or leftie.left or None
+        right_wall = rightie.left or rightie.right or None
+        if left_wall and right_wall:
+            print(f" Marry cross-over nodes ==> {left_wall.name} ==> {right_wall.name}")
+            marry_right_wall_to_left_wall(left_wall, right_wall)
+
+        marry_right_wall_to_left_wall(leftie.left, leftie.right)
+        marry_right_wall_to_left_wall(rightie.left, rightie.right)
+
+    in_order(root)
+    marry_right_wall_to_left_wall(root.left, root.right)
 
 
 def construct_right_sibling(tree):
@@ -803,12 +1003,29 @@ def build_binary_tree_ext(preorder, inorder):
 
 
 if __name__ == "__main__":
-    preorder = ['H', 'B', 'F', 'E', 'A', 'C', 'D', 'G', 'I']
-    inorder = ['F', 'B', 'A', 'E', 'H', 'C', 'D', 'I', 'G']
-    # preorder = ['H', 'B', 'F', 'E', 'A']
-    # inorder = ['F', 'B', 'A', 'E', 'H']
-    node = build_binary_tree_ext(preorder, inorder)
-    print_in_order_new(node)
+    # nodes = build_tree_dict()
+    # print_in_order_traversal(nodes['a'])
+    # res = build_linked_list_from_edges(nodes['a'])
+    # print(res)
+
+    nodes = build_perfect_tree_new()
+    build_rlink_new(nodes['a'])
+
+    # res = compute_kth_node_in_order_traversal_new(nodes['a'], 6)
+    # if res:
+    #     print(res.name)
+    # else:
+    #     print(None)
+
+    # preorder = ['H', 'B', 'F', 'E', 'A', 'C', 'D', 'G', 'I']
+    # inorder = ['F', 'B', 'A', 'E', 'H', 'C', 'D', 'I', 'G']
+    # res = build_binary_tree_new(preorder, inorder)
+    # print(res)
+    # print_in_order_traversal(res)
+    # # preorder = ['H', 'B', 'F', 'E', 'A']
+    # # inorder = ['F', 'B', 'A', 'E', 'H']
+    # node = build_binary_tree_ext(preorder, inorder)
+    # print_in_order_new(node)
 
 #
 #

@@ -1,6 +1,7 @@
 import math
 import random
 import operator
+from bisect import *
 
 
 # 11.1 Find first occurrence of where array has duplicates
@@ -143,11 +144,27 @@ def find_kth_largest(k, A, B):
     return find_kth(operator.gt)
 
 
+def compute_actual_square_root(num):
+    low, high = 0, num
+    while True:
+        mid = (low + high) / 2
+        mid_square = mid * mid
+        if math.isclose(mid_square, num):
+            break
+        if mid_square > num:
+            high = mid
+        else:
+            low = mid
+    return low
+
+
 if __name__ == "__main__":
-    input = random.sample(range(1, 11), 10)
-    # input = [10, 9, 8, 2, 5, 4, 1, 6, 7, 3]
-    print('**********************')
-    print(input)
-    print('**********************')
-    print(find_kth_largest(4, input, input))
-    print('**********************')
+    res = compute_actual_square_root(63)
+    print(res)
+    # input = random.sample(range(1, 11), 10)
+    # # input = [10, 9, 8, 2, 5, 4, 1, 6, 7, 3]
+    # print('**********************')
+    # print(input)
+    # print('**********************')
+    # print(find_kth_largest(4, input, input))
+    # print('**********************')
